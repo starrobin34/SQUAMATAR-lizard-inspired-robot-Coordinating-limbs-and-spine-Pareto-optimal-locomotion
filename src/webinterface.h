@@ -18,7 +18,7 @@ void donwload_data();
 
 WebServer server(80); 
 
-bool start = false;
+// bool start_run = false;
 
 
 //tempory values 
@@ -76,9 +76,11 @@ void handle_root(){
   html += ".convertButton:active { position:relative; top:1px; }</style></head>";
 
   //html body 
-  html += "<body> <h1 style=\"text-align: left;\">Climbing Robot X5 Juggernaut</h1> <p>&nbsp;</p> <h2 style=\"text-align: left;\"><span style=\"text-decoration: underline;\">Robot Live Data:</span></h2> <p style=\"text-align: center;\">&nbsp;</p><div id=\"dataVals\"> ";
- 
-  //Live Data Table 
+  html += "<body> <h1 style=\"text-align: left;\">Climbing Robot X5 Juggernaut</h1> <p>&nbsp;</p>"; 
+
+  html += "<body><h2 style=\"text-align: left;\"><span style=\"text-decoration: underline;\">Live Data:</span></h2>";
+
+    //Live Data Table 
   html += "<table style=\"height: 83px; margin-left: auto; margin-right: auto;\" width=\"727\">";                     
   html += "<tbody>";
   html += "<tr style=\"height: 33.875px;\">";                                                                         //row header
@@ -93,7 +95,6 @@ void handle_root(){
   html += "<td style=\"width: 174px; text-align: center; height: 33.875px;\"><strong>Mean Current</strong></td>";
   html += "<td style=\"width: 176px; text-align: center; height: 33.875px;\"></tr>";
 
-  //PUT IN FOR LOOP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //table which displays live sensor data during each run
   html += "<tr style=\"height: 45px;\"> <td style=\"width: 174px; text-align: center; height: 45px;\">1</td>";                                     //row stride 1
   html += "<td style=\"width: 174px; text-align: center; height: 45px;\"><div id=\"r1_0\">";
@@ -426,21 +427,24 @@ void handle_root(){
   html += "document.getElementById(\"r11_6\").innerHTML = obj.data[86].dataValue;";
   html += "document.getElementById(\"r11_7\").innerHTML = obj.data[87].dataValue;";
 
+  html += "} }; xhttp.open(\"POST\", \"/data\", true); xhttp.send(); ";
+  html += "} var timedEvent = setInterval(function(){ loadDoc(); }, 2000); function outputUpdate(vol) { clearInterval(timedEvent); timedEvent = setInterval(function(){ loadDoc(); }, vol); document.querySelector('#volume').value = vol; delayVal = vol; } </script> </body>";
 
+  //=================================================================================================================================================================================== CSV OUTPUT
+  //generating the DOWNLOAD button
+  //CHANGE NAME OF csv output file HERE!!!
+  html += "<body><a href=\"X5_juggernaut.csv\"><button style=\"display: block; width: 100%;\">DOWNLOAD</button></a><br/></body>";
 
-
-  html += "} }; xhttp.open(\"POST\", \"/data\", true); xhttp.send(); "; // updates Data with calling the get data function  
-  html += "} var timedEvent = setInterval(function(){ loadDoc(); }, 2000); function outputUpdate(vol) { clearInterval(timedEvent); timedEvent = setInterval(function(){ loadDoc(); }, vol); document.querySelector('#volume').value = vol; delayVal = vol; } </script> </body>"; // sets the rate for updating the table 
 
   
-  //generating the DOWNLOAD button for downloading the csv data 
-  //CHANGE NAME OF csv output file HERE!!!
-  html += "<body><a href=\"X5_juggernaut.csv\"><button style=\"display: block; width: 100%;\">DOWNLOAD</button></a><br/></body>"; //download button calls download data func
+
    
   String myIP = WiFi.softAPIP().toString();
   html += "<body><h2 style=\"text-align: left;\"><span style=\"text-decoration: underline;\">Climbing Parameters:</span></h2>";
   html += "<form action='http://" + myIP + "' method='POST'>";
-  html += "Step:<input type='text' name='step_input' value='0'><BR>"; //value ='default value' declares a value that will show up everytime the website refreshes
+  html += "Step:<input type='text' name='step_input' value='"; 
+  html += number_of_steps;
+  html += "'><BR>";
   html += "Gait:<input type='text' name='gait_input' value='";
   html += gait;
   html += "'><BR>"; // It makes sure that changeRobot() always gets 5 variables to print, which were defined at the top of the code
@@ -456,20 +460,19 @@ void handle_root(){
   html += "Dynamics:<input type='text' name='function_input' value='";
   html += dynamic;
   html += "'><BR>";
-  html += "<input type='submit' value='Start run'>"; // omit <input type='submit' value='Enter'> for just 'enter'
-  html += "</form>";
-  html += "</body></html>";
-
-
+  html += "<input type='submit' value='Enter'"; // omit <input type='submit' value='Enter'> for just 'enter'
+  html += "'><BR>";
+  
   server.send(200, "text/html", html); 
 
   if (server.args() > 0 ) { // Arguments were received
     for ( uint8_t i = 0; i < server.args(); i++ ) {
 
       argument_name = server.argName(i);
-      
+      if (server.argName(i) == "step_input") {
 
-
+        number_of_steps = server.arg(i).toInt();
+      }
       if (server.argName(i) == "gait_input") {
 
         gait = server.arg(i).toInt();
@@ -491,14 +494,9 @@ void handle_root(){
         dynamic = server.arg(i).toInt();
       }
 
-      home_pos(); //???? here 
-      delay(3000);  
-      
+    //   home_pos(); //???????????????? working ????
 
     }
-
-    home_pos(); //??? or here ? 
-
     }
 
 }
@@ -1586,3 +1584,8 @@ void download_data(){
 
   server.send(200, "html/text", txt);
 }
+
+// void start_robot(){
+//     Serial.println("Start Button pressed"); 
+//     start_run = true; 
+// }

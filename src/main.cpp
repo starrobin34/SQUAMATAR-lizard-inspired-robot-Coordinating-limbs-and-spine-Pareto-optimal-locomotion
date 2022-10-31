@@ -20,8 +20,9 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(IP);
 
+  //callback functions for http requests  
   server.on("/", handle_root); 
-  server.on("/data", get_data); //????? nicht fuer variablen
+  server.on("/data", get_data); 
   server.on("/X5_juggernaut.csv", download_data); 
   server.begin();
 
@@ -38,6 +39,8 @@ void loop() {
 
   server.handleClient(); 
 
+  // if (start_run == true)
+  // {
     if (gait == 1)
     {
       Serial.println("Starting Gait 1"); 
@@ -49,4 +52,8 @@ void loop() {
       Serial.println("Starting Gait 2"); 
       gait2(); 
     }
+  // }
+  
+
+    
 }
