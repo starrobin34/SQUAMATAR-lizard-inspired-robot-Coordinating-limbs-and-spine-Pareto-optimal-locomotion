@@ -22,7 +22,7 @@ void setup() {
 
   //callback functions for http requests  
   server.on("/", handle_root); 
-  server.on("/data", get_data); 
+  // server.on("/data", get_data); 
   server.on("/X5_juggernaut.csv", download_data); 
   server.begin();
 
