@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 
+
 //Wifi Credentials 
 const char* ssid = "X5 Robot Juggernaut"; 
 const char* password = ""; 
@@ -13,19 +14,9 @@ String argument_name;
 //fuction prototypes 
 void handle_root(); 
 void get_data(); 
-void donwload_data(); 
 
 
 WebServer server(80); 
-
-
-
-//information 
-String robot = "X5_Juggernaut"; 
-int climb_incline = 90; 
-String claw_angle = "10", surface = "coarse_carpet", toe_angle = "0";
-float leg_length = 25;
-
 
 void handle_root(){
 
@@ -516,13 +507,24 @@ void handle_root(){
 
         hind_leg_center = server.arg(i).toInt();
       }
+
+
+         
+
       
-      // home_pos(); 
 
+  //  test test test 
+       
+
+  //if live data probably better here 
+      if (gait == 1) //maybe in function handle root ? 
+    {
+      Serial.println("Starting Gait 1"); 
+      gait1();
+    }
 
     }
     }
-
 }
 
 void get_data(){
@@ -849,10 +851,13 @@ void download_data(){
   txt += ", ";
   txt += "Surface";
   txt += ", ";
-  txt += "Incline";
+  txt += "Incline_degree";
   txt += ", ";
-  txt += "leg_length";
+  txt += "leg_length_in_mm";
   txt += ", ";
+  txt += "spine_length_in_mm";
+  txt += ", ";
+  
 
   //data collection
   txt += "Stride";
@@ -871,7 +876,7 @@ void download_data(){
   txt += ", ";
   txt += "Current_Spike_in_mA";
   txt += ", ";
-  txt += "FL_Feet_Success";
+  txt += "FL_Feet_Success_in_percent";
   txt += ", ";
   txt += "FR_Feet_Success_in_percent";
   txt += ", ";
@@ -934,6 +939,8 @@ void download_data(){
   txt += ", ";
   txt += leg_length;
   txt += ", ";
+  txt += spine_length;
+  txt += ", ";
 
 
 
@@ -983,11 +990,855 @@ void download_data(){
   txt += " \n";  //linebreak
 
 
-//Row 2 
+//Row 3
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
 
- 
+  txt += stride[1]; //stride
+  txt += ", ";
+  txt += distance[1]; // dist
+  txt += ", ";
+  txt += elapsed_time[1]; //time
+  txt += ", ";
+  txt += xaxis_val[1];//xgyro
+  txt += ", ";
+  txt += yaxis_val[1];//ygyro
+  txt += ", ";
+  txt += zaxis_val[1];//zgyro
+  txt += ", ";
+  txt += mean_current[1];// mean current during stride
+  txt += ", ";
+  txt += max_current[1];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[1];
+  txt += ", ";
+  txt += rff_suc[1];
+  txt += ", ";
+  txt += rhf_suc[1];
+  txt += ", ";
+  txt += lhf_suc[1];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[1];
+  txt += ", ";
+  txt += rfs_suc[1];
+  txt += ", ";
+  txt += rhs_suc[1];
+  txt += ", ";
+  txt += lhs_suc[1];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[1];
+  txt += ", ";
+  txt += rfa_suc[1];
+  txt += ", ";
+  txt += lha_suc[1];
+  txt += ", ";
+  txt += rha_suc[1];
+  txt += " \n";  //linebreak
 
+  //Row 4
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
 
+  txt += stride[2]; //stride
+  txt += ", ";
+  txt += distance[2]; // dist
+  txt += ", ";
+  txt += elapsed_time[2]; //time
+  txt += ", ";
+  txt += xaxis_val[2];//xgyro
+  txt += ", ";
+  txt += yaxis_val[2];//ygyro
+  txt += ", ";
+  txt += zaxis_val[2];//zgyro
+  txt += ", ";
+  txt += mean_current[2];// mean current during stride
+  txt += ", ";
+  txt += max_current[2];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[2];
+  txt += ", ";
+  txt += rff_suc[2];
+  txt += ", ";
+  txt += rhf_suc[2];
+  txt += ", ";
+  txt += lhf_suc[2];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[2];
+  txt += ", ";
+  txt += rfs_suc[2];
+  txt += ", ";
+  txt += rhs_suc[2];
+  txt += ", ";
+  txt += lhs_suc[2];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[2];
+  txt += ", ";
+  txt += rfa_suc[2];
+  txt += ", ";
+  txt += lha_suc[2];
+  txt += ", ";
+  txt += rha_suc[2];
+  txt += " \n";  //linebreak
+
+  //Row 5 
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[3]; //stride
+  txt += ", ";
+  txt += distance[3]; // dist
+  txt += ", ";
+  txt += elapsed_time[3]; //time
+  txt += ", ";
+  txt += xaxis_val[3];//xgyro
+  txt += ", ";
+  txt += yaxis_val[3];//ygyro
+  txt += ", ";
+  txt += zaxis_val[3];//zgyro
+  txt += ", ";
+  txt += mean_current[3];// mean current during stride
+  txt += ", ";
+  txt += max_current[3];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[3];
+  txt += ", ";
+  txt += rff_suc[3];
+  txt += ", ";
+  txt += rhf_suc[3];
+  txt += ", ";
+  txt += lhf_suc[3];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[3];
+  txt += ", ";
+  txt += rfs_suc[3];
+  txt += ", ";
+  txt += rhs_suc[3];
+  txt += ", ";
+  txt += lhs_suc[3];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[3];
+  txt += ", ";
+  txt += rfa_suc[3];
+  txt += ", ";
+  txt += lha_suc[3];
+  txt += ", ";
+  txt += rha_suc[3];
+  txt += " \n";  //linebreak
+
+  //Row 6 
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[4]; //stride
+  txt += ", ";
+  txt += distance[4]; // dist
+  txt += ", ";
+  txt += elapsed_time[4]; //time
+  txt += ", ";
+  txt += xaxis_val[4];//xgyro
+  txt += ", ";
+  txt += yaxis_val[4];//ygyro
+  txt += ", ";
+  txt += zaxis_val[4];//zgyro
+  txt += ", ";
+  txt += mean_current[4];// mean current during stride
+  txt += ", ";
+  txt += max_current[4];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[4];
+  txt += ", ";
+  txt += rff_suc[4];
+  txt += ", ";
+  txt += rhf_suc[4];
+  txt += ", ";
+  txt += lhf_suc[4];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[4];
+  txt += ", ";
+  txt += rfs_suc[4];
+  txt += ", ";
+  txt += rhs_suc[4];
+  txt += ", ";
+  txt += lhs_suc[4];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[4];
+  txt += ", ";
+  txt += rfa_suc[4];
+  txt += ", ";
+  txt += lha_suc[4];
+  txt += ", ";
+  txt += rha_suc[4];
+  txt += " \n";  //linebreak
+
+  //Row 7 
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[5]; //stride
+  txt += ", ";
+  txt += distance[5]; // dist
+  txt += ", ";
+  txt += elapsed_time[5]; //time
+  txt += ", ";
+  txt += xaxis_val[5];//xgyro
+  txt += ", ";
+  txt += yaxis_val[5];//ygyro
+  txt += ", ";
+  txt += zaxis_val[5];//zgyro
+  txt += ", ";
+  txt += mean_current[5];// mean current during stride
+  txt += ", ";
+  txt += max_current[5];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[5];
+  txt += ", ";
+  txt += rff_suc[5];
+  txt += ", ";
+  txt += rhf_suc[5];
+  txt += ", ";
+  txt += lhf_suc[5];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[5];
+  txt += ", ";
+  txt += rfs_suc[5];
+  txt += ", ";
+  txt += rhs_suc[5];
+  txt += ", ";
+  txt += lhs_suc[5];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[5];
+  txt += ", ";
+  txt += rfa_suc[5];
+  txt += ", ";
+  txt += lha_suc[5];
+  txt += ", ";
+  txt += rha_suc[5];
+  txt += " \n";  //linebreak
+
+  //Row 8 
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[6]; //stride
+  txt += ", ";
+  txt += distance[6]; // dist
+  txt += ", ";
+  txt += elapsed_time[6]; //time
+  txt += ", ";
+  txt += xaxis_val[6];//xgyro
+  txt += ", ";
+  txt += yaxis_val[6];//ygyro
+  txt += ", ";
+  txt += zaxis_val[6];//zgyro
+  txt += ", ";
+  txt += mean_current[6];// mean current during stride
+  txt += ", ";
+  txt += max_current[6];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[6];
+  txt += ", ";
+  txt += rff_suc[6];
+  txt += ", ";
+  txt += rhf_suc[6];
+  txt += ", ";
+  txt += lhf_suc[6];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[6];
+  txt += ", ";
+  txt += rfs_suc[6];
+  txt += ", ";
+  txt += rhs_suc[6];
+  txt += ", ";
+  txt += lhs_suc[6];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[6];
+  txt += ", ";
+  txt += rfa_suc[6];
+  txt += ", ";
+  txt += lha_suc[6];
+  txt += ", ";
+  txt += rha_suc[6];
+  txt += " \n";  //linebreak
+
+  //Row 9 
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[7]; //stride
+  txt += ", ";
+  txt += distance[7]; // dist
+  txt += ", ";
+  txt += elapsed_time[7]; //time
+  txt += ", ";
+  txt += xaxis_val[7];//xgyro
+  txt += ", ";
+  txt += yaxis_val[7];//ygyro
+  txt += ", ";
+  txt += zaxis_val[7];//zgyro
+  txt += ", ";
+  txt += mean_current[7];// mean current during stride
+  txt += ", ";
+  txt += max_current[7];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[7];
+  txt += ", ";
+  txt += rff_suc[7];
+  txt += ", ";
+  txt += rhf_suc[7];
+  txt += ", ";
+  txt += lhf_suc[7];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[7];
+  txt += ", ";
+  txt += rfs_suc[7];
+  txt += ", ";
+  txt += rhs_suc[7];
+  txt += ", ";
+  txt += lhs_suc[7];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[7];
+  txt += ", ";
+  txt += rfa_suc[7];
+  txt += ", ";
+  txt += lha_suc[7];
+  txt += ", ";
+  txt += rha_suc[7];
+  txt += " \n";  //linebreak
+
+  //Row 10
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[8]; //stride
+  txt += ", ";
+  txt += distance[8]; // dist
+  txt += ", ";
+  txt += elapsed_time[8]; //time
+  txt += ", ";
+  txt += xaxis_val[8];//xgyro
+  txt += ", ";
+  txt += yaxis_val[8];//ygyro
+  txt += ", ";
+  txt += zaxis_val[8];//zgyro
+  txt += ", ";
+  txt += mean_current[8];// mean current during stride
+  txt += ", ";
+  txt += max_current[8];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[8];
+  txt += ", ";
+  txt += rff_suc[8];
+  txt += ", ";
+  txt += rhf_suc[8];
+  txt += ", ";
+  txt += lhf_suc[8];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[8];
+  txt += ", ";
+  txt += rfs_suc[8];
+  txt += ", ";
+  txt += rhs_suc[8];
+  txt += ", ";
+  txt += lhs_suc[8];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[8];
+  txt += ", ";
+  txt += rfa_suc[8];
+  txt += ", ";
+  txt += lha_suc[8];
+  txt += ", ";
+  txt += rha_suc[8];
+  txt += " \n";  //linebreak
+
+  //Row 11 
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[9]; //stride
+  txt += ", ";
+  txt += distance[9]; // dist
+  txt += ", ";
+  txt += elapsed_time[9]; //time
+  txt += ", ";
+  txt += xaxis_val[9];//xgyro
+  txt += ", ";
+  txt += yaxis_val[9];//ygyro
+  txt += ", ";
+  txt += zaxis_val[9];//zgyro
+  txt += ", ";
+  txt += mean_current[9];// mean current during stride
+  txt += ", ";
+  txt += max_current[9];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[9];
+  txt += ", ";
+  txt += rff_suc[9];
+  txt += ", ";
+  txt += rhf_suc[9];
+  txt += ", ";
+  txt += lhf_suc[9];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[9];
+  txt += ", ";
+  txt += rfs_suc[9];
+  txt += ", ";
+  txt += rhs_suc[9];
+  txt += ", ";
+  txt += lhs_suc[9];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[9];
+  txt += ", ";
+  txt += rfa_suc[9];
+  txt += ", ";
+  txt += lha_suc[9];
+  txt += ", ";
+  txt += rha_suc[9];
+  txt += " \n";  //linebreak
+
+  //Row 12 
+//fixed vals 
+  txt += robot;
+  txt += ", ";
+  txt += dynamic;
+  txt += ", ";
+  txt += speed_val;
+  txt += ", ";
+  txt += speed_val_foot;
+  txt += ", ";
+  txt += rom_limb;
+  txt += ", ";
+  txt += rom_spine;
+  txt += ", ";
+  txt += rom_feet;
+  txt += ", ";
+  txt += foot_center;
+  txt += ", ";
+  txt += front_leg_center;
+  txt += ", ";
+  txt += hind_leg_center;
+  txt += ", ";
+  txt += dynamic_wrist_angle;
+  txt += ", ";
+  txt += front_wrist_angle;
+  txt += ", ";
+  txt += hind_wrist_angle;
+  txt += ", ";
+  txt += toe_angle;
+  txt += ", ";
+  txt += claw_angle;
+  txt += ", ";
+  txt += surface;
+  txt += ", ";
+  txt += climb_incline;
+  txt += ", ";
+  txt += leg_length;
+  txt += ", ";
+  txt += spine_length;
+  txt += ", ";
+
+  txt += stride[10]; //stride
+  txt += ", ";
+  txt += distance[10]; // dist
+  txt += ", ";
+  txt += elapsed_time[10]; //time
+  txt += ", ";
+  txt += xaxis_val[10];//xgyro
+  txt += ", ";
+  txt += yaxis_val[10];//ygyro
+  txt += ", ";
+  txt += zaxis_val[10];//zgyro
+  txt += ", ";
+  txt += mean_current[10];// mean current during stride
+  txt += ", ";
+  txt += max_current[10];// current spike of stride
+  txt += ", ";
+  //feet success 
+  txt += lff_suc[10];
+  txt += ", ";
+  txt += rff_suc[10];
+  txt += ", ";
+  txt += rhf_suc[10];
+  txt += ", ";
+  txt += lhf_suc[10];
+  txt += ", ";
+  //shoulder success 
+  txt += lfs_suc[10];
+  txt += ", ";
+  txt += rfs_suc[10];
+  txt += ", ";
+  txt += rhs_suc[10];
+  txt += ", ";
+  txt += lhs_suc[10];
+  txt += ", ";
+  //wrist success 
+  txt += lfa_suc[10];
+  txt += ", ";
+  txt += rfa_suc[10];
+  txt += ", ";
+  txt += lha_suc[10];
+  txt += ", ";
+  txt += rha_suc[10];
+  // txt += " \n";  //linebreak
 
   server.send(200, "html/text", txt);
 }
