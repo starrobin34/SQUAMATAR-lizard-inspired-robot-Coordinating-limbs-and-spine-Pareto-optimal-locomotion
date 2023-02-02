@@ -3,23 +3,29 @@
 */
 
 #include <Wire.h>
-#include <Adafruit_INA219.h>
-#include <MPU6050_tockn.h>
-#include <Adafruit_VL53L0X.h>
 #include <Adafruit_PWMServoDriver.h>
+#include "Adafruit_VL53L1X.h"
+#include "DFRobot_INA219.h"
+#include <DFRobot_BMI160.h>
 
+
+Adafruit_VL53L1X vl53 = Adafruit_VL53L1X();
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
-Adafruit_VL53L0X dist_sensor = Adafruit_VL53L0X();
-Adafruit_INA219 current_sensor(0x41); 
-MPU6050 gyro(Wire);
+DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
+DFRobot_BMI160 bmi160;
+const int8_t i2c_addr = 0x69;
+
+// Revise the following two paramters according to actula reading of the INA219 and the multimeter
+// for linearly calibration
+float ina219Reading_mA = 1000;
+float extMeterReading_mA = 1000;
 
 int step_val = 0; 
 
-
-
 int get_dist(); 
 float get_current(); 
-float get_gyro();  
+float get_accel(int val); 
+float get_angles(int val);
 
 
 int get_dist(){ 
@@ -29,60 +35,69 @@ int get_dist(){
   int sum = 0;  
   int mean_dist; 
 
-  measured_dist = dist_sensor.readRange(); 
-   
-  if (measured_dist <= 85)
-  {
-    step_val = 20; 
-    Serial.println("End of track reached!"); 
-  }
+  measured_dist = vl53.distance();
 
-  if (measured_dist >= 8190) //input max reading of sensor here 
-  {
-    step_val = 20; 
-    Serial.println("Distance sensor read max!"); 
-  }
+   
+  // if (measured_dist <= 20)
+  // {
+  //   step_val = 20; 
+  //   Serial.print(measured_dist); 
+  //   Serial.println("End of track reached!"); 
+  // }
+
+  // if (measured_dist == -1) //input max reading of sensor here 
+  // {
+  //   step_val = 20; 
+  //   Serial.print(measured_dist); 
+  //   Serial.println("Distance sensor read max!"); 
+  // }
 
   for (size_t i = 0; i < sample_size; i++)
   {
-    sum += dist_sensor.readRange();
+    sum += vl53.distance();
     delay(1); 
   }
 
   mean_dist = sum / sample_size; 
 
+    // Serial.print("Sensor read: "); 
+    // Serial.println(mean_dist); 
+  
   return mean_dist;
 }
 
 float get_current(){ 
 
   float current; 
-  current = current_sensor.getCurrent_mA(); 
+  current = ina219.getCurrent_mA(); 
   
   return current; 
 }
 
-float get_gyro(int val){ 
+float get_accel(int val){ 
   
-  float measured_xaxisValue, measured_yaxisValue, measured_zaxisValue, measured_temp = 0.0;
+  float measured_xaxisValue, measured_yaxisValue, measured_zaxisValue;
+  float z_angle, y_angle; 
+  int rslt;
+  int16_t accelGyro[6]={0}; 
 
-  float x[5] = {0.0}; //arrays to store X, Y, Z - Orientation
+  float x[5] = {0.0}; //arrays to store acceleration in X, Y, Z 
   float y[5] = {0.0};
   float z[5] = {0.0};
 
   for (size_t i = 0 ; i < 5; i++) {
-    gyro.update();
-    x[i] = gyro.getAccAngleX();
-    y[i] = gyro.getAccAngleY();
-    z[i] = gyro.getGyroAngleZ();
+    rslt = bmi160.getAccelData(accelGyro);
+    if(rslt == 0){
+        x[i] = accelGyro[0]/16384.0; //get linear acceleration in g-force 
+        y[i] = accelGyro[1]/16384.0; 
+        z[i] = accelGyro[2]/16384.0;   
+    }
     delay(1);
   }
 
   measured_xaxisValue = (x[0] + x[1] + x[2] + x[3] + x[4]) / 5; //Mean to reduce influence of noise of the sensor
   measured_yaxisValue = (y[0] + y[1] + y[2] + y[3] + y[4]) / 5;
   measured_zaxisValue = (z[0] + z[1] + z[2] + z[3] + z[4]) / 5;
-
-  measured_temp = gyro.getTemp();
 
   if (val == 1)
   {
@@ -96,9 +111,16 @@ float get_gyro(int val){
   {
     return measured_zaxisValue; 
   }
-    if (val == 4)
+  if (val = 4)
   {
-    return measured_temp; 
+    z_angle = atan2(measured_yaxisValue, measured_zaxisValue); 
+    return z_angle; 
   }
+  if (val = 5)
+  {
+    y_angle = asin(measured_zaxisValue/9.81)
+  }
+  
   return 0.0; 
 }
+
