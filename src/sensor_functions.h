@@ -20,8 +20,7 @@ const int8_t i2c_addr = 0x69;
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
 
-float y_ang_offset = 0.0; 
-float z_ang_offset = 0.0; 
+float y_ang_offset = 0.0, z_ang_offset = 0.0, x_acc_offset = 0.0, y_acc_offset = 0.0, z_acc_offset = 0.0;  
 
 int step_val = 0; 
 
@@ -39,20 +38,19 @@ int get_dist(){
 
   measured_dist = vl53.distance();
 
-   
-  // if (measured_dist <= 20)
-  // {
-  //   step_val = 20; 
-  //   Serial.print(measured_dist); 
-  //   Serial.println("End of track reached!"); 
-  // }
+  if (measured_dist <= 20)
+  {
+    step_val = 20; 
+    Serial.print(measured_dist); 
+    Serial.println("End of track reached!"); 
+  }
 
-  // if (measured_dist == -1) //input max reading of sensor here 
-  // {
-  //   step_val = 20; 
-  //   Serial.print(measured_dist); 
-  //   Serial.println("Distance sensor read max!"); 
-  // }
+  if (measured_dist == -1) //input max reading of sensor here 
+  {
+    step_val = 20; 
+    Serial.print(measured_dist); 
+    Serial.println("Distance sensor read max!"); 
+  }
 
   for (size_t i = 0; i < sample_size; i++)
   {
@@ -84,30 +82,30 @@ float get_accel(int val){
   int16_t accelGyro[6]={0}; 
   float rad_to_deg = 180 / PI;
 
-  //Mean for more precision 
-  float x[5] = {0.0}; //arrays to store acceleration in X, Y, Z 
-  float y[5] = {0.0};
-  float z[5] = {0.0};
+  // //Mean for more precision --> SLOWER !! 
+  // float x[5] = {0.0}; //arrays to store acceleration in X, Y, Z 
+  // float y[5] = {0.0};
+  // float z[5] = {0.0};
 
-  for (size_t i = 0 ; i < 5; i++) {
-    rslt = bmi160.getAccelGyroData(accelGyro); //SLOW !!!
-        x[i] = accelGyro[3]/16384.0; //get linear acceleration in g-force 
-        y[i] = accelGyro[4]/16384.0; 
-        z[i] = accelGyro[5]/16384.0;   
-  }
+  // for (size_t i = 0 ; i < 5; i++) {
+  //   rslt = bmi160.getAccelGyroData(accelGyro); //SLOW !!!
+  //       x[i] = accelGyro[3]/16384.0; //get linear acceleration in g-force 
+  //       y[i] = accelGyro[4]/16384.0; 
+  //       z[i] = accelGyro[5]/16384.0;   
+  // }
 
-  measured_xaxisValue = (x[0] + x[1] + x[2] + x[3] + x[4]) / 5; //Mean to reduce influence of noise of the sensor
-  measured_yaxisValue = (y[0] + y[1] + y[2] + y[3] + y[4]) / 5;
-  measured_zaxisValue = (z[0] + z[1] + z[2] + z[3] + z[4]) / 5;
+  // measured_xaxisValue = (x[0] + x[1] + x[2] + x[3] + x[4]) / 5; //Mean to reduce influence of noise of the sensor
+  // measured_yaxisValue = (y[0] + y[1] + y[2] + y[3] + y[4]) / 5;
+  // measured_zaxisValue = (z[0] + z[1] + z[2] + z[3] + z[4]) / 5;
 
   //No mean 
-  // rslt = bmi160.getAccelGyroData(accelGyro);
-  // if (rslt == 0)
-  // {
-  // measured_xaxisValue = accelGyro[3]/16384.0;
-  // measured_yaxisValue = accelGyro[4]/16384.0;
-  // measured_zaxisValue = accelGyro[5]/16384.0;
-  // }
+  rslt = bmi160.getAccelGyroData(accelGyro);
+  if (rslt == 0)
+  {
+  measured_xaxisValue = accelGyro[3]/16384.0;
+  measured_yaxisValue = accelGyro[4]/16384.0;
+  measured_zaxisValue = accelGyro[5]/16384.0;
+  }
   
   if (val == 1)
   {

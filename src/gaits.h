@@ -54,7 +54,7 @@ int rom_spine = 10; //range of motion of spine
 int rom_limb = 10; //range of motion of legs 
 int rom_feet = 75; //range of motion of feet 
 int dynamic = 1; //defines which dynamic to use (1 = sigmoid, 2 = sinusoid) 
-int gait = 1;  // defines which gait to use (0, no gait, 1 = regular gait, 2 turn gait (NOT YET IMPLEMENTED)) 
+int gait = 0;  // defines which gait to use (0, no gait, 1 = regular gait, 2 turn gait (NOT YET IMPLEMENTED)) 
 int speed_val = 500; //(500 Standard) Speed of leg and spine (changes the delay between each increment in microseconds)
 int speed_val_foot = 500; // defines the speed for lifting the feet (changes the delay between each increment in microseconds)
 int number_of_steps = 3; //number of full steps to be taken 
@@ -177,9 +177,11 @@ void gait1(){ //gait for regular forward movement
   //calibration vals for accelerometer angle calc 
   y_ang_offset = get_accel(4);
   z_ang_offset = get_accel(5);
+  x_acc_offset = get_accel(1); 
+  y_acc_offset = get_accel(2); 
+  z_acc_offset = get_accel(3); 
   // Serial.println(y_ang_offset); 
   // Serial.println(z_ang_offset);
-
 
   // intial  (half) right step starting from home position 
     
@@ -203,7 +205,6 @@ void gait1(){ //gait for regular forward movement
     move_motor(rhs, h_rhs - (0.5 * dynamic_movement_legs(i))); //move back shoulder         
     move_motor(lhs, h_lhs - (0.5 * dynamic_movement_legs(i)));
 
-     
     if (dynamic_wrist_angle == 1)
     {
     move_motor(lfa, h_lfa + (0.5 * dynamic_movement_legs(i)) + (0.5 * dynamic_movement_spine(i)));  //rotate wrists 
@@ -212,11 +213,9 @@ void gait1(){ //gait for regular forward movement
     move_motor(rha, h_rha - ((0.5 * dynamic_movement_legs(i)) + (0.5 * dynamic_movement_spine(i))));
     }
      
-     
     delayMicroseconds(speed_val);
 
   } 
-
 
     for (int i = 0; i < resolution_dynamic_functions; i++)
     {
@@ -226,9 +225,7 @@ void gait1(){ //gait for regular forward movement
     delayMicroseconds(speed_val_foot); 
  
     }
-
     // Serial.println("Done with half right step"); 
-
 
 //------------------------------------------------------------------------------------------------------------ Real Gait 
 
@@ -242,7 +239,7 @@ void gait1(){ //gait for regular forward movement
   double delta = atan((2*cos(alpha + beta)* leg_length + 2*cos(alpha)*should_offset)/(2*cos(alpha)*spine_front + spine_middle)); 
   double psi_delta = atan((leg_length + should_offset)/(spine_front + 0.5* spine_middle)); 
   double psi_max = psi_delta - delta; 
-  psi_max = psi_max *(180 / PI) + 20; 
+  psi_max = psi_max *(180 / PI); 
 
   for (step_val ; step_val <= (number_of_steps - 1); step_val++) //
   {
@@ -285,9 +282,9 @@ void gait1(){ //gait for regular forward movement
         // Serial.println(current_during_stride[curr_index]);
 
         //gyro PROBLEM: SLOW !!!!!!!!!
-        // xaxis_during_stride[curr_index] = get_accel(1); 
-        // yaxis_during_stride[curr_index] = get_accel(2); 
-        // zaxis_during_stride[curr_index] = get_accel(3); 
+        xaxis_during_stride[curr_index] = get_accel(1); 
+        yaxis_during_stride[curr_index] = get_accel(2); 
+        zaxis_during_stride[curr_index] = get_accel(3); 
       }
 
       delayMicroseconds(speed_val); 
@@ -361,10 +358,10 @@ void gait1(){ //gait for regular forward movement
 
       if (dynamic_wrist_angle == 1)
       {
-      move_motor(lfa, h_lfa + (-rom_spine + dynamic_movement_spine(i)) + (-rom_limb + dynamic_movement_legs(i)) + (psi_max - abs(psi_max - i*(psi_max/200))));  //rotate wrists 
-      move_motor(rfa, h_rfa + (-rom_spine + dynamic_movement_spine(i)) + (-rom_limb + dynamic_movement_legs(i)) + (psi_max - abs(psi_max - i*(psi_max/200))));
-      move_motor(lha, h_lha + (rom_spine - dynamic_movement_spine(i)) + (rom_limb - dynamic_movement_legs(i)) + (psi_max - abs(psi_max - i*(psi_max/200))));
-      move_motor(rha, h_rha + (rom_spine - dynamic_movement_spine(i)) + (rom_limb - dynamic_movement_legs(i)) + (psi_max - abs(psi_max - i*(psi_max/200))));
+      move_motor(lfa, h_lfa + (-rom_spine + dynamic_movement_spine(i)) + (-rom_limb + dynamic_movement_legs(i)) - (psi_max - abs(psi_max - i*(psi_max/200))));  //rotate wrists 
+      move_motor(rfa, h_rfa + (-rom_spine + dynamic_movement_spine(i)) + (-rom_limb + dynamic_movement_legs(i)) - (psi_max - abs(psi_max - i*(psi_max/200))));
+      move_motor(lha, h_lha + (rom_spine - dynamic_movement_spine(i)) + (rom_limb - dynamic_movement_legs(i)) - (psi_max - abs(psi_max - i*(psi_max/200))));
+      move_motor(rha, h_rha + (rom_spine - dynamic_movement_spine(i)) + (rom_limb - dynamic_movement_legs(i)) - (psi_max - abs(psi_max - i*(psi_max/200))));
     
       }
 
@@ -373,13 +370,12 @@ void gait1(){ //gait for regular forward movement
         int curr_index = 40 + (i / 10); 
         current_during_stride[curr_index] = get_current(); //index 40 - 79
         
-        // xaxis_during_stride[curr_index] = get_accel(1); 
-        // yaxis_during_stride[curr_index] = get_accel(2); 
-        // zaxis_during_stride[curr_index] = get_accel(3); 
+        xaxis_during_stride[curr_index] = get_accel(1); 
+        yaxis_during_stride[curr_index] = get_accel(2); 
+        zaxis_during_stride[curr_index] = get_accel(3); 
       }
 
       delayMicroseconds(speed_val);
-
     }
 
     for (int i = 0; i < resolution_dynamic_functions; i++) 
@@ -432,16 +428,17 @@ void gait1(){ //gait for regular forward movement
     mean_current[step_val] = curr_sum / (sizeof(current_during_stride) / sizeof(current_during_stride[0])); 
 
     //accelerometer
-    //calc mean acceleration during step for each axis ---> Too slow !!!!!!!!
-    // for (size_t i = 0; i < (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0])); i++)
-    // {
-    //   xaxis_sum += xaxis_during_stride[i]; 
-    //   yaxis_sum += yaxis_during_stride[i]; 
-    //   zaxis_sum += zaxis_during_stride[i]; 
-    // }
-    // mean_acc_xaxis[step_val] = xaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0])); 
-    // mean_acc_yaxis[step_val] = yaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0]));
-    // mean_acc_zaxis[step_val] = zaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0]));
+    //calc mean acceleration during step for each axis 
+    xaxis_sum = 0.0, yaxis_sum = 0.0, zaxis_sum = 0.0;  
+    for (size_t i = 0; i < (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0])); i++)
+    {
+      xaxis_sum += xaxis_during_stride[i] - x_acc_offset; 
+      yaxis_sum += yaxis_during_stride[i] - y_acc_offset; 
+      zaxis_sum += zaxis_during_stride[i] - z_acc_offset; 
+    }
+    mean_acc_xaxis[step_val] = xaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0])); 
+    mean_acc_yaxis[step_val] = yaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0]));
+    mean_acc_zaxis[step_val] = zaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0]));
     // Serial.println( mean_acc_xaxis[step_val]);
     // Serial.println( mean_acc_yaxis[step_val]);
     // Serial.println( mean_acc_zaxis[step_val]);
@@ -452,15 +449,6 @@ void gait1(){ //gait for regular forward movement
     // Serial.println(angle_yaxis[step_val]); 
     // Serial.println(angle_zaxis[step_val]); 
 
-    // //debugging vals 
-    // Serial.println(step_val);  //print step val for all steps 
-    // Serial.println(distance[step_val]);                                                                     
-    // Serial.println(max_current[step_val]); 
-    // Serial.println(mean_current[step_val]); 
-    // Serial.println(xaxis_val[step_val]);
-    // Serial.println(temp[step_val]); 
-    // Serial.println("======================================================="); 
-    
   // server.handleClient(); //needed if live table used ?!
   }
 
