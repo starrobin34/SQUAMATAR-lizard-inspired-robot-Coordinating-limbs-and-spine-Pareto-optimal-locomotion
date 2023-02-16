@@ -127,17 +127,17 @@ void handle_root(){
       if (server.argName(i) == "foot_offset") {
 
         foot_center = server.arg(i).toInt();
-        home_pos();
+        // home_pos();
       }
       if (server.argName(i) == "front_wrist") {
 
         front_wrist_angle = server.arg(i).toInt();
-        home_pos();
+        // home_pos();
       }
       if (server.argName(i) == "hind_wrist") {
 
         hind_wrist_angle = server.arg(i).toInt();
-        home_pos();
+        // home_pos();
       }
       if (server.argName(i) == "dynamic_wrist") {
 
@@ -146,15 +146,15 @@ void handle_root(){
       if (server.argName(i) == "front center") {
 
         front_leg_center = server.arg(i).toInt();
-        home_pos();
+        // home_pos();
       }
       if (server.argName(i) == "hind center") {
 
         hind_leg_center = server.arg(i).toInt();
-        home_pos();
+        // home_pos();
       }
     }
-
+    home_pos();
     // if (gait == 1) //maybe in function handle root ? 
     // {
     //   Serial.println("Starting Gait 1"); 
@@ -212,7 +212,7 @@ void download_data(){
   //data collection
   txt += "Stride";
   txt += ", ";
-  txt += "Distance_in_mm  ";
+  txt += "Distance_per_step_mm";
   txt += ", ";
   txt += "Time_in_s";
   txt += ", ";
@@ -221,6 +221,10 @@ void download_data(){
   txt += "Y_mean_acc_in_g";
   txt += ", ";
   txt += "Z_mean_acc_in_g";
+  txt += ", ";
+  txt += "Angle_yaxis";
+  txt += ", ";
+  txt += "Angle_zaxis";
   txt += ", ";
   txt += "Mean_Current_Consumption_in_mA";
   txt += ", ";
@@ -306,6 +310,10 @@ void download_data(){
   txt += mean_acc_yaxis[0];//ygyro
   txt += ", ";
   txt += mean_acc_zaxis[0];//zgyro
+  txt += ", ";
+  txt += angle_yaxis[0];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[0];//zgyro
   txt += ", ";
   txt += mean_current[0];// mean current during stride
   txt += ", ";
@@ -393,6 +401,10 @@ void download_data(){
   txt += ", ";
   txt += mean_acc_zaxis[1];//zgyro
   txt += ", ";
+  txt += angle_yaxis[1];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[1];//zgyro  
+  txt += ", ";
   txt += mean_current[1];// mean current during stride
   txt += ", ";
   txt += max_current[1];// current spike of stride
@@ -477,6 +489,10 @@ void download_data(){
   txt += mean_acc_yaxis[2];//ygyro
   txt += ", ";
   txt += mean_acc_zaxis[2];//zgyro
+  txt += ", ";
+  txt += angle_yaxis[2];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[2];//zgyro  
   txt += ", ";
   txt += mean_current[2];// mean current during stride
   txt += ", ";
@@ -563,6 +579,10 @@ void download_data(){
   txt += ", ";
   txt += mean_acc_zaxis[3];//zgyro
   txt += ", ";
+  txt += angle_yaxis[3];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[3];//zgyro  
+  txt += ", ";
   txt += mean_current[3];// mean current during stride
   txt += ", ";
   txt += max_current[3];// current spike of stride
@@ -647,6 +667,10 @@ void download_data(){
   txt += mean_acc_yaxis[4];//ygyro
   txt += ", ";
   txt += mean_acc_zaxis[4];//zgyro
+  txt += ", ";
+  txt += angle_yaxis[4];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[4];//zgyro  
   txt += ", ";
   txt += mean_current[4];// mean current during stride
   txt += ", ";
@@ -733,6 +757,10 @@ void download_data(){
   txt += ", ";
   txt += mean_acc_zaxis[5];//zgyro
   txt += ", ";
+  txt += angle_yaxis[5];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[5];//zgyro  
+  txt += ", ";
   txt += mean_current[5];// mean current during stride
   txt += ", ";
   txt += max_current[5];// current spike of stride
@@ -817,6 +845,10 @@ void download_data(){
   txt += mean_acc_yaxis[6];//ygyro
   txt += ", ";
   txt += mean_acc_zaxis[6];//zgyro
+  txt += ", ";
+  txt += angle_yaxis[6];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[6];//zgyro  
   txt += ", ";
   txt += mean_current[6];// mean current during stride
   txt += ", ";
@@ -903,6 +935,10 @@ void download_data(){
   txt += ", ";
   txt += mean_acc_zaxis[7];//zgyro
   txt += ", ";
+  txt += angle_yaxis[7];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[7];//zgyro  
+  txt += ", ";
   txt += mean_current[7];// mean current during stride
   txt += ", ";
   txt += max_current[7];// current spike of stride
@@ -987,6 +1023,10 @@ void download_data(){
   txt += mean_acc_yaxis[8];//ygyro
   txt += ", ";
   txt += mean_acc_zaxis[8];//zgyro
+  txt += ", ";
+  txt += angle_yaxis[8];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[8];//zgyro  
   txt += ", ";
   txt += mean_current[8];// mean current during stride
   txt += ", ";
@@ -1073,6 +1113,10 @@ void download_data(){
   txt += ", ";
   txt += mean_acc_zaxis[9];//zgyro
   txt += ", ";
+  txt += angle_yaxis[9];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[9];//zgyro  
+  txt += ", ";
   txt += mean_current[9];// mean current during stride
   txt += ", ";
   txt += max_current[9];// current spike of stride
@@ -1158,6 +1202,10 @@ void download_data(){
   txt += ", ";
   txt += mean_acc_zaxis[10];//zgyro
   txt += ", ";
+  txt += angle_yaxis[10];//zgyro
+  txt += ", ";
+  txt += angle_zaxis[10];//zgyro  
+  txt += ", ";
   txt += mean_current[10];// mean current during stride
   txt += ", ";
   txt += max_current[10];// current spike of stride
@@ -1190,5 +1238,5 @@ void download_data(){
   txt += rha_suc[10];
 
 
-  server.send(200, "html/text", txt);
+  server.send(200, "html/text", txt); 
 }

@@ -15,17 +15,19 @@ DFRobot_INA219_IIC ina219(&Wire, INA219_I2C_ADDRESS4);
 DFRobot_BMI160 bmi160;
 const int8_t i2c_addr = 0x69;
 
-// Revise the following two paramters according to actula reading of the INA219 and the multimeter
+// Revise the following two paramters according to actual reading of the INA219 and the multimeter
 // for linearly calibration
 float ina219Reading_mA = 1000;
 float extMeterReading_mA = 1000;
+
+float y_ang_offset = 0.0; 
+float z_ang_offset = 0.0; 
 
 int step_val = 0; 
 
 int get_dist(); 
 float get_current(); 
 float get_accel(int val); 
-float get_angles(int val);
 
 
 int get_dist(){ 
@@ -60,7 +62,7 @@ int get_dist(){
 
   mean_dist = sum / sample_size; 
 
-    // Serial.print("Sensor read: "); 
+    // Serial.print("Dist. Sensor read: "); 
     // Serial.println(mean_dist); 
   
   return mean_dist;
@@ -80,25 +82,33 @@ float get_accel(int val){
   float z_angle, y_angle; 
   int rslt;
   int16_t accelGyro[6]={0}; 
+  float rad_to_deg = 180 / PI;
 
+  //Mean for more precision 
   float x[5] = {0.0}; //arrays to store acceleration in X, Y, Z 
   float y[5] = {0.0};
   float z[5] = {0.0};
 
   for (size_t i = 0 ; i < 5; i++) {
-    rslt = bmi160.getAccelData(accelGyro);
-    if(rslt == 0){
-        x[i] = accelGyro[0]/16384.0; //get linear acceleration in g-force 
-        y[i] = accelGyro[1]/16384.0; 
-        z[i] = accelGyro[2]/16384.0;   
-    }
-    delay(1);
+    rslt = bmi160.getAccelGyroData(accelGyro); //SLOW !!!
+        x[i] = accelGyro[3]/16384.0; //get linear acceleration in g-force 
+        y[i] = accelGyro[4]/16384.0; 
+        z[i] = accelGyro[5]/16384.0;   
   }
 
   measured_xaxisValue = (x[0] + x[1] + x[2] + x[3] + x[4]) / 5; //Mean to reduce influence of noise of the sensor
   measured_yaxisValue = (y[0] + y[1] + y[2] + y[3] + y[4]) / 5;
   measured_zaxisValue = (z[0] + z[1] + z[2] + z[3] + z[4]) / 5;
 
+  //No mean 
+  // rslt = bmi160.getAccelGyroData(accelGyro);
+  // if (rslt == 0)
+  // {
+  // measured_xaxisValue = accelGyro[3]/16384.0;
+  // measured_yaxisValue = accelGyro[4]/16384.0;
+  // measured_zaxisValue = accelGyro[5]/16384.0;
+  // }
+  
   if (val == 1)
   {
     return measured_xaxisValue; 
@@ -111,14 +121,15 @@ float get_accel(int val){
   {
     return measured_zaxisValue; 
   }
-  if (val = 4)
+  if (val == 4)
   {
-    z_angle = atan2(measured_yaxisValue, measured_zaxisValue); 
-    return z_angle; 
+    y_angle = (rad_to_deg * (atan2(measured_yaxisValue, measured_xaxisValue))) - y_ang_offset;
+    return y_angle; 
   }
-  if (val = 5)
+  if (val == 5)
   {
-    y_angle = asin(measured_zaxisValue/9.81)
+    z_angle = (rad_to_deg * (atan2(-measured_zaxisValue, measured_xaxisValue))) - z_ang_offset; 
+    return z_angle; 
   }
   
   return 0.0; 

@@ -56,6 +56,7 @@ void setup() {
     Serial.println(vl53.vl_status);
     while (1)       delay(10);
   }
+
   vl53.setTimingBudget(140); // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms!
   vl53.VL53L1X_SetDistanceMode(2); //2 = long, 1=short
 
@@ -70,7 +71,6 @@ void setup() {
     while(1);
   }
 
-
   home_pos(); //All Servos to home position 
   for (size_t i = 0; i < 5; i++)
   {
@@ -80,7 +80,6 @@ void setup() {
     delay(100); 
   }
   delay(1000); 
-  
 }
 
 
