@@ -72,7 +72,8 @@ void setup() {
   }
 
   home_pos(); //All Servos to home position 
-  for (size_t i = 0; i < 5; i++)
+
+  for (size_t i = 0; i < 5; i++) //blink led 
   {
     digitalWrite(GPIO_NUM_4, HIGH);
     delay(100);
@@ -82,14 +83,6 @@ void setup() {
   delay(1000); 
 }
 
-
 void loop() {
-
   server.handleClient(); 
-
-  if (gait == 1) //maybe in function handle root ? 
-  {
-    Serial.println("Starting Gait 1"); 
-    gait1();
-  }
 }

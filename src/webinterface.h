@@ -5,7 +5,6 @@
 #include <WiFi.h>
 #include <WebServer.h>
 
-
 //Wifi Credentials 
 const char* ssid = "X5 Robot Juggernaut"; 
 const char* password = ""; 
@@ -127,17 +126,14 @@ void handle_root(){
       if (server.argName(i) == "foot_offset") {
 
         foot_center = server.arg(i).toInt();
-        // home_pos();
       }
       if (server.argName(i) == "front_wrist") {
 
         front_wrist_angle = server.arg(i).toInt();
-        // home_pos();
       }
       if (server.argName(i) == "hind_wrist") {
 
         hind_wrist_angle = server.arg(i).toInt();
-        // home_pos();
       }
       if (server.argName(i) == "dynamic_wrist") {
 
@@ -146,20 +142,34 @@ void handle_root(){
       if (server.argName(i) == "front center") {
 
         front_leg_center = server.arg(i).toInt();
-        // home_pos();
       }
       if (server.argName(i) == "hind center") {
 
         hind_leg_center = server.arg(i).toInt();
-        // home_pos();
       }
     }
+
+    //redefine variables to update 
+    h_lff = hh_lff + foot_center; 
+    h_lfs = hh_lfs - front_leg_center;
+    h_rfs = hh_rfs + front_leg_center;
+    h_rff = hh_rff + foot_center;
+    h_rhf = hh_rhf + foot_center;
+    h_rhs = hh_rhs + hind_leg_center;
+    h_lhs = hh_lhs - hind_leg_center;
+    h_lhf = hh_lhf - foot_center;
+    h_lfa = hh_lfa + front_wrist_angle - front_leg_center; 
+    h_rfa = hh_rfa - front_wrist_angle + front_leg_center; 
+    h_lha = hh_lha + hind_wrist_angle - hind_leg_center; 
+    h_rha = hh_rha -  hind_wrist_angle + hind_leg_center; 
+    rom_wrist_angle = rom_spine + rom_limb; 
     home_pos();
-    // if (gait == 1) //maybe in function handle root ? 
-    // {
-    //   Serial.println("Starting Gait 1"); 
-    //   gait1();
-    // }
+
+    if (gait == 1) //maybe in function handle root ? 
+    {
+      Serial.println("Starting Gait 1"); 
+      gait1();
+    }
   }
 }
 

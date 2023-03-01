@@ -67,7 +67,7 @@ int dynamic_wrist_angle = 1; //defines if dynamically counteracting Wrist angle 
 
 //Input Variables for motion (not adjustable in web interface) 
 int resolution_dynamic_functions = 400; //increments for the dynamic functions 
-int rom_wrist_angle = rom_spine + rom_limb; 
+static int rom_wrist_angle = rom_spine + rom_limb; 
 
 //information variables  
 int climb_incline = 90; 
@@ -120,22 +120,33 @@ void gait1();
 int sensor_to_angle(int motor_num, int feedback_pin); //convert sensor reading to angle 
 
 
-//Home Positions of Servos
-int h_lff = 71 + foot_center; //Front left foot
-int h_lfs = 93 - front_leg_center; //Front left shoulder 
-int h_rfs = 99 + front_leg_center; //Front right shoulder
-int h_rff = 86 + foot_center; //Front right foot
-int h_fs = 94; //Spine Front
-int h_hs = 88; //Spine Hind
-int h_rhf = 112 + foot_center; //Hind right foot
-int h_rhs = 79 + hind_leg_center; //Hind right shoulder
-int h_lhs = 83 - hind_leg_center;  //Hind left shoulder
-int h_lhf = 90 - foot_center; //Hind left foot
-int h_lfa = 138 + front_wrist_angle + front_leg_center ; //Front Left Wrist Angle
-int h_rfa = 143 - front_wrist_angle - front_leg_center; //Front Right Wrist Angle 
-int h_lha = 131 + hind_wrist_angle + hind_leg_center; //Hind left Wrist Angle
-int h_rha = 141 -  hind_wrist_angle - hind_leg_center; //Hind Rigth Wrist Angle
-
+//Home Positions of Servos (hh offset home position, h position after change via webpage)
+static int hh_lff = 71; //Front left foot
+int h_lff = hh_lff; 
+static int hh_lfs = 93; //Front left shoulder 
+int h_lfs = hh_lfs; 
+static int hh_rfs = 99; //Front right shoulder
+int h_rfs = hh_rfs; 
+static int hh_rff = 86; //Front right foot
+int h_rff = hh_rff; 
+static int h_fs = 94; //Spine Front
+static int h_hs = 88; //Spine Hind
+static int hh_rhf = 112; //Hind right foot
+int h_rhf = hh_rhf; 
+static int hh_rhs = 79; //Hind right shoulder
+int h_rhs = hh_rhs; 
+static int hh_lhs = 83;  //Hind left shoulder
+int h_lhs = hh_lhs;
+static int hh_lhf = 90; //Hind left foot
+int h_lhf = hh_lhf; 
+static int hh_lfa = 138; //Front Left Wrist Angle
+int h_lfa = hh_lfa;
+static int hh_rfa = 143; //Front Right Wrist Angle 
+int h_rfa = hh_rfa; 
+static int hh_lha = 131; //Hind left Wrist Angle
+int h_lha = hh_lha; 
+static int hh_rha = 141; //Hind Rigth Wrist Angle
+int h_rha = hh_rha; 
 
 void move_motor(int motor_num, int angle){
     
