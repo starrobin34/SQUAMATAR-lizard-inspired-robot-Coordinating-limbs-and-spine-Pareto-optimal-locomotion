@@ -57,7 +57,7 @@ int dynamic = 1; //defines which dynamic to use (1 = sigmoid, 2 = sinusoid)
 int gait = 0;  // defines which gait to use (0, no gait, 1 = regular gait, 2 turn gait (NOT YET IMPLEMENTED)) 
 int speed_val = 500; //(500 Standard) Speed of leg and spine (changes the delay between each increment in microseconds)
 int speed_val_foot = 500; // defines the speed for lifting the feet (changes the delay between each increment in microseconds)
-int number_of_steps = 3; //number of full steps to be taken 
+int number_of_steps = 11; //number of full steps to be taken 
 int foot_center= 0; //defines the offset of the angle of the feet to the vertical to the ground axis 
 int front_leg_center = 0; //defines the center where the middle of the range of motion lies (frontlegs)
 int hind_leg_center = 0; //defines the center where the middle of the range of motion lies (backlegs)
@@ -240,7 +240,7 @@ void gait1(){ //gait for regular forward movement
 
 //------------------------------------------------------------------------------------------------------------ Real Gait 
 
-  unsigned long start_time = millis()/1000;
+  float start_time = millis()/1000;
   int first_dist = get_dist();  
   // Serial.println(raw_dist[step_val]); 
 
