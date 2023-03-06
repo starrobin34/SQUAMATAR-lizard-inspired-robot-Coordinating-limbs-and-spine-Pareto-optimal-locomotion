@@ -55,8 +55,8 @@ int rom_limb = 10; //range of motion of legs
 int rom_feet = 75; //range of motion of feet 
 int dynamic = 1; //defines which dynamic to use (1 = sigmoid, 2 = sinusoid) 
 int gait = 0;  // defines which gait to use (0, no gait, 1 = regular gait, 2 turn gait (NOT YET IMPLEMENTED)) 
-int speed_val = 500; //(500 Standard) Speed of leg and spine (changes the delay between each increment in microseconds)
-int speed_val_foot = 500; // defines the speed for lifting the feet (changes the delay between each increment in microseconds)
+int speed_val = 15; //(500 Standard) Speed of leg and spine (changes the delay between each increment in microseconds)
+int speed_val_foot = 15; // defines the speed for lifting the feet (changes the delay between each increment in microseconds)
 int number_of_steps = 11; //number of full steps to be taken 
 int foot_center= 0; //defines the offset of the angle of the feet to the vertical to the ground axis 
 int front_leg_center = 0; //defines the center where the middle of the range of motion lies (frontlegs)
@@ -66,7 +66,7 @@ int hind_wrist_angle = 0; //defines the orientation of the hind foot ( + for pos
 int dynamic_wrist_angle = 1; //defines if dynamically counteracting Wrist angle is used (0 = not used, 1 = counteracting by angle,  2 = counteracting by reading analog pins (NOT YET IMPLEMENTED)) 
 
 //Input Variables for motion (not adjustable in web interface) 
-int resolution_dynamic_functions = 400; //increments for the dynamic functions 
+int resolution_dynamic_functions = 50; //increments for the dynamic functions 
 static int rom_wrist_angle = rom_spine + rom_limb; 
 
 //information variables  
@@ -85,14 +85,14 @@ float mean_acc_yaxis[11] = {0};
 float mean_acc_zaxis[11] = {0};
 float angle_yaxis[11] = {0}; //acc at end of stride ---> for calculation of angle 
 float angle_zaxis[11] = {0}; //acc at end of stride ---> for calculation of angle 
-float xaxis_during_stride [80] = {0}; 
-float yaxis_during_stride [80] = {0};
-float zaxis_during_stride [80] = {0};
+float xaxis_during_stride [10] = {0}; 
+float yaxis_during_stride [10] = {0};
+float zaxis_during_stride [10] = {0};
 float xaxis_sum, yaxis_sum, zaxis_sum;
 //current measurements
 float mean_current[11] = {0}; //average current consumption per stride in A
 float max_current [11] = {0};//displays maximal current spike in a stride in A 
-float current_during_stride [80] = {0}; //stores current values of a stride, size displays number of measurements per stride
+float current_during_stride [10] = {0}; //stores current values of a stride, size displays number of measurements per stride
 float curr_sum;
 //Servo Success in % e.g. did Servo reach the desired position 
 int lff_suc[11] = {0}; // Left front foot 
@@ -200,7 +200,7 @@ void gait1(){ //gait for regular forward movement
   {
     move_motor(lff, h_lff + dynamic_movement_feet(i)); //lift two across feet
     move_motor(rhf, h_rhf - dynamic_movement_feet(i));
-    delayMicroseconds(speed_val_foot); 
+    delay(speed_val_foot); 
 
   }
     
@@ -224,7 +224,7 @@ void gait1(){ //gait for regular forward movement
     move_motor(rha, h_rha - ((0.5 * dynamic_movement_legs(i)) + (0.5 * dynamic_movement_spine(i))));
     }
      
-    delayMicroseconds(speed_val);
+    delay(speed_val);
 
   } 
 
@@ -233,7 +233,7 @@ void gait1(){ //gait for regular forward movement
 
     move_motor(lff, (h_lff + rom_feet) - dynamic_movement_feet(i)); //put feet down
     move_motor(rhf, (h_rhf - rom_feet) + dynamic_movement_feet(i));
-    delayMicroseconds(speed_val_foot); 
+    delay(speed_val_foot); 
  
     }
     // Serial.println("Done with half right step"); 
@@ -262,7 +262,7 @@ void gait1(){ //gait for regular forward movement
     {
     move_motor(lhf, h_lhf + dynamic_movement_feet(i)); //lift two across feet
     move_motor(rff, h_rff - dynamic_movement_feet(i));
-    delayMicroseconds(speed_val_foot); 
+    delay(speed_val_foot); 
     }
 
     for (int i = 0 ; i < resolution_dynamic_functions; i++) 
@@ -289,49 +289,49 @@ void gait1(){ //gait for regular forward movement
       if (i % 10 == 0) //get current/accel each 10th increment 
       {
         int curr_index = i / 10; 
-        current_during_stride[curr_index] = get_current(); //index 0-39
+        current_during_stride[curr_index] = get_current(); //index 0-4
         // Serial.println(current_during_stride[curr_index]);
 
         //gyro PROBLEM: SLOW !!!!!!!!!
-        xaxis_during_stride[curr_index] = get_accel(1); 
-        yaxis_during_stride[curr_index] = get_accel(2); 
-        zaxis_during_stride[curr_index] = get_accel(3); 
+        // xaxis_during_stride[curr_index] = get_accel(1); 
+        // yaxis_during_stride[curr_index] = get_accel(2); 
+        // zaxis_during_stride[curr_index] = get_accel(3); 
       }
 
-      delayMicroseconds(speed_val); 
+      delay(speed_val); 
     }
 
     for (int i = 0; i < resolution_dynamic_functions; i++)
     {
     move_motor(lhf, (h_lhf + rom_feet) - dynamic_movement_feet(i)); //drop feet 
     move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
-    delayMicroseconds(speed_val_foot); 
+    delay(speed_val_foot); 
 
     }
     // Serial.println("Done with left step"); 
 
     //Success (currently only measured for the left step and not for the feet (not enough pins)) 
-    float fs_diff_angle =  ((h_fs + rom_spine) - rom_spine) - abs(((h_fs + rom_spine) - rom_spine) - sensor_to_angle(f_s, f_s_feed)); 
-    f_s_suc[step_val] = roundf(100 * fs_diff_angle / ((h_fs + rom_spine) - rom_spine)); 
+    // float fs_diff_angle =  ((h_fs + rom_spine) - rom_spine) - abs(((h_fs + rom_spine) - rom_spine) - sensor_to_angle(f_s, f_s_feed)); 
+    // f_s_suc[step_val] = roundf(100 * fs_diff_angle / ((h_fs + rom_spine) - rom_spine)); 
 
-    float hs_diff_angle = ((h_hs - rom_spine) + rom_spine) - abs(((h_hs - rom_spine) + rom_spine) - sensor_to_angle(h_s, h_s_feed)); 
-    h_s_suc[step_val] = roundf(100 * hs_diff_angle / ((h_hs - rom_spine) + rom_spine)); 
+    // float hs_diff_angle = ((h_hs - rom_spine) + rom_spine) - abs(((h_hs - rom_spine) + rom_spine) - sensor_to_angle(h_s, h_s_feed)); 
+    // h_s_suc[step_val] = roundf(100 * hs_diff_angle / ((h_hs - rom_spine) + rom_spine)); 
 
-    float lfs_diff_angle = ((h_lfs + rom_limb) - rom_limb) - abs(((h_lfs + rom_limb) - rom_limb) - sensor_to_angle(lfs, lfs_feed)); 
-    lfs_suc[step_val] = roundf(100 * lfs_diff_angle / ((h_lfs + rom_limb) - rom_limb)); 
+    // float lfs_diff_angle = ((h_lfs + rom_limb) - rom_limb) - abs(((h_lfs + rom_limb) - rom_limb) - sensor_to_angle(lfs, lfs_feed)); 
+    // lfs_suc[step_val] = roundf(100 * lfs_diff_angle / ((h_lfs + rom_limb) - rom_limb)); 
 
-    float rfs_diff_angle = ((h_rfs + rom_limb) - rom_limb) - abs(((h_rfs + rom_limb) - rom_limb) - sensor_to_angle(rfs, rfs_feed)); 
-    rfs_suc[step_val] = roundf(100 * rfs_diff_angle / ((h_rfs + rom_limb) - rom_limb)); 
+    // float rfs_diff_angle = ((h_rfs + rom_limb) - rom_limb) - abs(((h_rfs + rom_limb) - rom_limb) - sensor_to_angle(rfs, rfs_feed)); 
+    // rfs_suc[step_val] = roundf(100 * rfs_diff_angle / ((h_rfs + rom_limb) - rom_limb)); 
 
-    float rff_diff_angle = ((h_lhf + rom_feet) - rom_feet) - abs(((h_lhf + rom_feet) - rom_feet) - sensor_to_angle(rff, rff_feed)); 
-    rff_suc[step_val] = roundf(100 * rff_diff_angle / ((h_lhf + rom_feet) - rom_feet)); 
+    // float rff_diff_angle = ((h_lhf + rom_feet) - rom_feet) - abs(((h_lhf + rom_feet) - rom_feet) - sensor_to_angle(rff, rff_feed)); 
+    // rff_suc[step_val] = roundf(100 * rff_diff_angle / ((h_lhf + rom_feet) - rom_feet)); 
 
-    float lhf_diff_angle = ((h_lhf + rom_feet) - rom_feet) - abs(((h_lhf + rom_feet) - rom_feet) - sensor_to_angle(lhf, lhf_feed)); 
-    lhf_suc[step_val] = roundf(100 * lhf_diff_angle / ((h_lhf + rom_feet) - rom_feet)); 
+    // float lhf_diff_angle = ((h_lhf + rom_feet) - rom_feet) - abs(((h_lhf + rom_feet) - rom_feet) - sensor_to_angle(lhf, lhf_feed)); 
+    // lhf_suc[step_val] = roundf(100 * lhf_diff_angle / ((h_lhf + rom_feet) - rom_feet)); 
 
     //wrists --> include psi angle !!! 
-    float rfa_diff_angle = h_rfa - abs(h_rfa - sensor_to_angle(rfa, rfa_feed)); 
-    rfa_suc[step_val] = roundf(100 * rfa_diff_angle / h_rfa); 
+    // float rfa_diff_angle = h_rfa - abs(h_rfa - sensor_to_angle(rfa, rfa_feed)); 
+    // rfa_suc[step_val] = roundf(100 * rfa_diff_angle / h_rfa); 
 
     // float lfa_diff_angle = h_lfa - abs(h_lfa - sensor_to_angle(lfa, lfa_feed)); 
     // lfa_suc[step_val] = roundf(100 * lfa_diff_angle / h_lfa); 
@@ -351,7 +351,7 @@ void gait1(){ //gait for regular forward movement
 
     move_motor(lff, h_lff + dynamic_movement_feet(i)); //lift feet 
     move_motor(rhf, h_rhf - dynamic_movement_feet(i));
-    delayMicroseconds(speed_val_foot); 
+    delay(speed_val_foot); 
     
     }
 
@@ -378,22 +378,22 @@ void gait1(){ //gait for regular forward movement
 
       if (i % 10 == 0) //get current/accel each 10th increment 
       {
-        int curr_index = 40 + (i / 10); 
-        current_during_stride[curr_index] = get_current(); //index 40 - 79
+        int curr_index = 4 + (i / 10); 
+        current_during_stride[curr_index] = get_current(); //index 4 - 9
         
-        xaxis_during_stride[curr_index] = get_accel(1); 
-        yaxis_during_stride[curr_index] = get_accel(2); 
-        zaxis_during_stride[curr_index] = get_accel(3); 
+        // xaxis_during_stride[curr_index] = get_accel(1); 
+        // yaxis_during_stride[curr_index] = get_accel(2); 
+        // zaxis_during_stride[curr_index] = get_accel(3); 
       }
 
-      delayMicroseconds(speed_val);
+      delay(speed_val);
     }
 
     for (int i = 0; i < resolution_dynamic_functions; i++) 
     {
     move_motor(lff, (h_lff + rom_feet) - dynamic_movement_feet(i)); //drop feet
     move_motor(rhf, (h_rhf - rom_feet) + dynamic_movement_feet(i));
-    delayMicroseconds(speed_val_foot); 
+    delay(speed_val_foot); 
 
     }
 
@@ -409,13 +409,13 @@ void gait1(){ //gait for regular forward movement
     if (step_val == 0)
     {
       raw_dist =  get_dist(); 
-      distance[step_val] = first_dist - raw_dist; //327 - 188 = 139
+      distance[step_val] = first_dist - raw_dist; 
     }
 
     if (step_val > 0)
     { 
       int temp_dist = get_dist(); 
-      distance[step_val] =  raw_dist - temp_dist; // 188 - 90 = 98
+      distance[step_val] =  raw_dist - temp_dist; 
       raw_dist = temp_dist; 
     }
 
@@ -470,15 +470,12 @@ void gait1(){ //gait for regular forward movement
   {
   move_motor(lhf, h_lhf + dynamic_movement_feet(i)); //lift two across feet
   move_motor(rff, h_rff - dynamic_movement_feet(i));
-  delayMicroseconds(speed_val_foot); 
+  delay(speed_val_foot); 
 
   }
     
   for (int i = 0 ; i <= resolution_dynamic_functions; i++) 
   {
-
-
-
     move_motor(f_s, (h_fs + rom_spine) - (0.5 * dynamic_movement_spine(i))); //bend body via spine
     move_motor(h_s, (h_hs - rom_spine) + (0.5 * dynamic_movement_spine(i)));
   
@@ -497,7 +494,7 @@ void gait1(){ //gait for regular forward movement
     }
      
      
-    delayMicroseconds(speed_val);
+    delay(speed_val);
 
   } 
 
@@ -506,7 +503,7 @@ void gait1(){ //gait for regular forward movement
     {
     move_motor(lhf, (h_lhf + rom_feet) - dynamic_movement_feet(i)); //drop feet 
     move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
-    delayMicroseconds(speed_val_foot); 
+    delay(speed_val_foot); 
     }
 
     // Serial.println("Done with final half step"); 
@@ -545,7 +542,7 @@ int dynamic_movement_spine(int increment){
   int motor_angle; 
   if (dynamic = 1)
   {
-    motor_angle = roundf(2 * rom_spine / (1 + exp(-0.025 * increment + 5)));
+    motor_angle = roundf(2 * rom_spine / (1 + exp(-0.2 * increment + 5)));
   }
   if (dynamic == 2){
     motor_angle = roundf(rom_spine * cos((PI/resolution_dynamic_functions) * increment + PI) + rom_spine); 
@@ -558,7 +555,7 @@ int dynamic_movement_legs(int increment){
   int motor_angle; 
 
   if (dynamic ==  1) {
-    motor_angle = roundf(2 * rom_limb / (1 + exp(-0.025 * increment + 5)));
+    motor_angle = roundf(2 * rom_limb / (1 + exp(-0.2 * increment + 5)));
   }
   if (dynamic == 2){
     motor_angle = roundf(rom_limb * cos((PI/resolution_dynamic_functions) * increment + PI) + rom_limb); 
@@ -570,7 +567,7 @@ int dynamic_movement_legs(int increment){
 int dynamic_movement_feet(int increment){
   int motor_angle; 
   if (dynamic == 1){
-    motor_angle = roundf(rom_feet / (1 + exp(-0.025 * increment + 5)));
+    motor_angle = roundf(rom_feet / (1 + exp(-0.2 * increment + 5)));
   }
   if (dynamic == 2){
     motor_angle = roundf(rom_feet * cos((PI/resolution_dynamic_functions) * increment + PI) + rom_feet); 

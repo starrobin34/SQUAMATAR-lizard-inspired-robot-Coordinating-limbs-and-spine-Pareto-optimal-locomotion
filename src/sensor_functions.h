@@ -99,12 +99,12 @@ float get_accel(int val){
   // measured_zaxisValue = (z[0] + z[1] + z[2] + z[3] + z[4]) / 5;
 
   //No mean 
-  // rslt = bmi160.getAccelGyroData(accelGyro);
+  rslt = bmi160.getAccelGyroData(accelGyro);
   if (rslt == 0)
   {
-  measured_xaxisValue = 0;//accelGyro[3]/16384.0;
-  measured_yaxisValue = 0;//accelGyro[4]/16384.0;
-  measured_zaxisValue = 0;//accelGyro[5]/16384.0;
+  measured_xaxisValue = accelGyro[3]/16384.0;
+  measured_yaxisValue = accelGyro[4]/16384.0;
+  measured_zaxisValue = accelGyro[5]/16384.0;
   }
   
   if (val == 1)
