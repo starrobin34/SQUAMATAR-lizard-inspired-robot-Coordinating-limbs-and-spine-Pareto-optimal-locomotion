@@ -23,7 +23,7 @@ void setup() {
   WiFi.softAP(ssid);
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
-  Serial.println(IP);
++  Serial.println(IP);
 
   //callback functions for http requests  
   server.on("/", handle_root); 

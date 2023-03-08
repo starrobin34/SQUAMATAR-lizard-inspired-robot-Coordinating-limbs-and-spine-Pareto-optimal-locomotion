@@ -76,8 +76,8 @@ float leg_length = 105, spine_length = 315, spine_middle = 181, should_offset = 
 float spine_front = (spine_length - spine_middle) / 2;  
 
 //Variables for Data Collection 
-unsigned long elapsed_time[11] =  {0}; //time of step in s 
-int stride[11] = {0}; 
+float elapsed_time[11] =  {0}; //time of step in s 
+int stride[11] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; 
 int distance[11] = {0}; //sum covered distance in mm 
 //accelerometer/gyro 
 float mean_acc_xaxis[11] =  {0};
@@ -94,6 +94,7 @@ float mean_current[11] = {0}; //average current consumption per stride in A
 float max_current [11] = {0};//displays maximal current spike in a stride in A 
 float current_during_stride [10] = {0}; //stores current values of a stride, size displays number of measurements per stride
 float curr_sum;
+int curr_index = 0; 
 //Servo Success in % e.g. did Servo reach the desired position 
 int lff_suc[11] = {0}; // Left front foot 
 int lfs_suc[11] = {0}; //left front shoulder
@@ -123,23 +124,23 @@ int sensor_to_angle(int motor_num, int feedback_pin); //convert sensor reading t
 //Home Positions of Servos (hh offset home position, h position after change via webpage)
 static int hh_lff = 71; //Front left foot
 int h_lff = hh_lff; 
-static int hh_lfs = 93; //Front left shoulder 
+static int hh_lfs = 94; //Front left shoulder 
 int h_lfs = hh_lfs; 
-static int hh_rfs = 99; //Front right shoulder
+static int hh_rfs = 97; //Front right shoulder
 int h_rfs = hh_rfs; 
 static int hh_rff = 86; //Front right foot
 int h_rff = hh_rff; 
 static int h_fs = 94; //Spine Front
-static int h_hs = 88; //Spine Hind
+static int h_hs = 90; //Spine Hind
 static int hh_rhf = 112; //Hind right foot
 int h_rhf = hh_rhf; 
 static int hh_rhs = 79; //Hind right shoulder
 int h_rhs = hh_rhs; 
 static int hh_lhs = 83;  //Hind left shoulder
 int h_lhs = hh_lhs;
-static int hh_lhf = 90; //Hind left foot
+static int hh_lhf = 87; //Hind left foot
 int h_lhf = hh_lhf; 
-static int hh_lfa = 138; //Front Left Wrist Angle
+static int hh_lfa = 136; //Front Left Wrist Angle
 int h_lfa = hh_lfa;
 static int hh_rfa = 143; //Front Right Wrist Angle 
 int h_rfa = hh_rfa; 
@@ -201,7 +202,6 @@ void gait1(){ //gait for regular forward movement
     move_motor(lff, h_lff + dynamic_movement_feet(i)); //lift two across feet
     move_motor(rhf, h_rhf - dynamic_movement_feet(i));
     delay(speed_val_foot); 
-
   }
     
   for (int i = 0 ; i < resolution_dynamic_functions; i++) 
@@ -230,19 +230,16 @@ void gait1(){ //gait for regular forward movement
 
     for (int i = 0; i < resolution_dynamic_functions; i++)
     {
-
     move_motor(lff, (h_lff + rom_feet) - dynamic_movement_feet(i)); //put feet down
     move_motor(rhf, (h_rhf - rom_feet) + dynamic_movement_feet(i));
-    delay(speed_val_foot); 
- 
+    delay(speed_val_foot);  
     }
     // Serial.println("Done with half right step"); 
 
 //------------------------------------------------------------------------------------------------------------ Real Gait 
 
-  float start_time = millis()/1000;
+  float start_time = millis()/1000.0;
   int first_dist = get_dist();  
-  // Serial.println(raw_dist[step_val]); 
 
   //Correcting the Wrist angle (tilt angle in between steps (psi))
   double alpha = (PI/180) * 0.5 * rom_spine; 
@@ -288,16 +285,15 @@ void gait1(){ //gait for regular forward movement
 
       if (i % 10 == 0) //get current/accel each 10th increment 
       {
-        int curr_index = i / 10; 
         current_during_stride[curr_index] = get_current(); //index 0-4
+        curr_index ++; 
         // Serial.println(current_during_stride[curr_index]);
 
         //gyro PROBLEM: SLOW !!!!!!!!!
-        // xaxis_during_stride[curr_index] = get_accel(1); 
-        // yaxis_during_stride[curr_index] = get_accel(2); 
-        // zaxis_during_stride[curr_index] = get_accel(3); 
+        xaxis_during_stride[curr_index] = get_accel(1); 
+        yaxis_during_stride[curr_index] = get_accel(2); 
+        zaxis_during_stride[curr_index] = get_accel(3); 
       }
-
       delay(speed_val); 
     }
 
@@ -337,10 +333,6 @@ void gait1(){ //gait for regular forward movement
     // lfa_suc[step_val] = roundf(100 * lfa_diff_angle / h_lfa); 
 
 
-
-                     
-
-
     //right step 1-11 --------------------------------------------------------------------- RIGHT
 
     // Serial.println("Starting with right step");
@@ -378,12 +370,12 @@ void gait1(){ //gait for regular forward movement
 
       if (i % 10 == 0) //get current/accel each 10th increment 
       {
-        int curr_index = 4 + (i / 10); 
-        current_during_stride[curr_index] = get_current(); //index 4 - 9
+        current_during_stride[curr_index] = get_current(); //index 5 - 9
+        curr_index ++; 
         
-        // xaxis_during_stride[curr_index] = get_accel(1); 
-        // yaxis_during_stride[curr_index] = get_accel(2); 
-        // zaxis_during_stride[curr_index] = get_accel(3); 
+        xaxis_during_stride[curr_index] = get_accel(1); 
+        yaxis_during_stride[curr_index] = get_accel(2); 
+        zaxis_during_stride[curr_index] = get_accel(3); 
       }
 
       delay(speed_val);
@@ -403,8 +395,7 @@ void gait1(){ //gait for regular forward movement
     //------------------------------------------------------------------
 
     elapsed_time[step_val] = (millis()/1000) - start_time; 
-    stride[step_val] = step_val + 1; 
-
+    //Calculate actual distance covered 
     int raw_dist; 
     if (step_val == 0)
     {
@@ -437,6 +428,7 @@ void gait1(){ //gait for regular forward movement
     }
 
     mean_current[step_val] = curr_sum / (sizeof(current_during_stride) / sizeof(current_during_stride[0])); 
+    curr_index = 0; 
 
     //accelerometer
     //calc mean acceleration during step for each axis 
@@ -459,7 +451,6 @@ void gait1(){ //gait for regular forward movement
     angle_zaxis[step_val] = get_accel(5); 
     // Serial.println(angle_yaxis[step_val]); 
     // Serial.println(angle_zaxis[step_val]); 
-
   // server.handleClient(); //needed if live table used ?!
   }
 

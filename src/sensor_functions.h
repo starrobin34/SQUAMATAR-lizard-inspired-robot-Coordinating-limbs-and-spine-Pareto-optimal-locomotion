@@ -38,17 +38,17 @@ int get_dist(){
 
   measured_dist = vl53.distance();
 
-  if (measured_dist <= 20)
+  if (measured_dist <= 100)
   {
-    step_val = 300; 
-    Serial.print(measured_dist); 
+    step_val = 200; 
+    Serial.println(measured_dist); 
     Serial.println("End of track reached!"); 
   }
 
   if (measured_dist == -1) //input max reading of sensor here 
   {
-    step_val = 20; 
-    Serial.print(measured_dist); 
+    step_val = 200; 
+    Serial.println(measured_dist); 
     Serial.println("Distance sensor read max!"); 
   }
 
