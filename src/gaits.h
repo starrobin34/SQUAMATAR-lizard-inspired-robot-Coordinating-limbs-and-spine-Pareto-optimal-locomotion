@@ -111,6 +111,8 @@ int rfa_suc[11] = {0}; //Right Front Wrist Angle
 int lha_suc[11] = {0}; //Left hind Wrist angle 
 int rha_suc[11] = {0}; //Right hind Wrist Angle 
 
+bool interrupt_mid_stride = false;
+
 //function prototypes 
 void move_motor(int motor_num, int angle); //move Servo certain angle 
 void home_pos(); //returns all Servos to home position  
@@ -186,7 +188,6 @@ void move_motor(int motor_num, int angle){
 
 void gait1(){ //gait for regular forward movement 
     //reset all arrays 
-  delay(500);
   for (size_t i = 0; i <= 10; i++)
   {
     elapsed_time[i] = 0.0; 
@@ -323,16 +324,16 @@ void gait1(){ //gait for regular forward movement
     move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
     delay(speed_val_foot); 
     }
+    // Serial.println("Done with left step"); 
 
     get_dist(); //to detect if end of track/fall mid stride 
     if (interrupt == true)
     {
-      Serial.println("Gait interrupted mid stride"); 
+      // Serial.println("Gait interrupted mid stride"); 
       step_val = 200; 
+      interrupt_mid_stride = true; 
       break;
     }
-    
-    // Serial.println("Done with left step"); 
 
     //Success (currently only measured for the left step and not for the feet (not enough pins)) 
     // float fs_diff_angle =  ((h_fs + rom_spine) - rom_spine) - abs(((h_fs + rom_spine) - rom_spine) - sensor_to_angle(f_s, f_s_feed)); 
@@ -498,52 +499,100 @@ void gait1(){ //gait for regular forward movement
     }   
   }
 
-  // // final (half) leftstep to get into home position
-  // // Serial.println("Starting with final half left step"); 
-    
-  // for (int i = 0; i <= resolution_dynamic_functions; i++)
-  // {
-  // move_motor(lhf, h_lhf + dynamic_movement_feet(i)); //lift two across feet
-  // move_motor(rff, h_rff - dynamic_movement_feet(i));
-  // delay(speed_val_foot); 
+  Serial.println(interrupt_mid_stride); 
 
-  // }
+  if (interrupt_mid_stride == true)
+  {
+  //final half right step to go to home 
+  // Serial.println("final half right step to go to home "); 
+  for (int i = 0; i < resolution_dynamic_functions; i++)
+  {
+    move_motor(lff, h_lff + dynamic_movement_feet(i)); //lift two across feet
+    move_motor(rhf, h_rhf - dynamic_movement_feet(i));
+    delay(speed_val_foot); 
+  }
     
-  // for (int i = 0 ; i <= resolution_dynamic_functions; i++) 
-  // {
-  //   move_motor(f_s, (h_fs + rom_spine) - (0.5 * dynamic_movement_spine(i))); //bend body via spine
-  //   move_motor(h_s, (h_hs - rom_spine) + (0.5 * dynamic_movement_spine(i)));
+  for (int i = 0 ; i < resolution_dynamic_functions; i++) 
+  {
+
+      move_motor(f_s, (h_fs - rom_spine) + 0.5 * dynamic_movement_spine(i)); //bend body
+      move_motor(h_s, (h_hs + rom_spine) - 0.5 * dynamic_movement_spine(i));
+      
+      move_motor(lfs, (h_lfs - rom_limb) + 0.5 * dynamic_movement_legs(i)); //move frontlegs
+      move_motor(rfs, (h_rfs - rom_limb) + 0.5 * dynamic_movement_legs(i));
+
+      move_motor(rhs, (h_rhs + rom_limb) - 0.5 * dynamic_movement_legs(i)); //move backlegs
+      move_motor(lhs, (h_lhs + rom_limb) - 0.5 * dynamic_movement_legs(i));
+
+    if (dynamic_wrist_angle == 1)
+    {
+    move_motor(lfa, h_lfa + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));  //rotate wrists 
+    move_motor(rfa, h_rfa + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
+    move_motor(lha, h_lha + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));
+    move_motor(rha, h_rha + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));
+    }
+    delay(speed_val);
+
+  } 
+
+    for (int i = 0; i < resolution_dynamic_functions; i++)
+    {
+    move_motor(lff, (h_lff + rom_feet) - dynamic_movement_feet(i)); //put feet down
+    move_motor(rhf, (h_rhf - rom_feet) + dynamic_movement_feet(i));
+    delay(speed_val_foot);  
+    }
+    // Serial.println("Done with half right step");  
+  }
+
+  else
+  {
+  // final (half) leftstep to get into home position
+  // Serial.println("final half left step to go to home "); 
+  for (int i = 0; i <= resolution_dynamic_functions; i++)
+  {
+  move_motor(lhf, h_lhf + dynamic_movement_feet(i)); //lift two across feet
+  move_motor(rff, h_rff - dynamic_movement_feet(i));
+  delay(speed_val_foot); 
+
+  }
+    
+  for (int i = 0 ; i <= resolution_dynamic_functions; i++) 
+  {
+    move_motor(f_s, (h_fs + rom_spine) - (0.5 * dynamic_movement_spine(i))); //bend body via spine
+    move_motor(h_s, (h_hs - rom_spine) + (0.5 * dynamic_movement_spine(i)));
   
-  //   move_motor(lfs, (h_lfs + rom_limb) - (0.5 * dynamic_movement_legs(i))); //move front shoulder
-  //   move_motor(rfs, (h_rfs + rom_limb) - (0.5 * dynamic_movement_legs(i)));
+    move_motor(lfs, (h_lfs + rom_limb) - (0.5 * dynamic_movement_legs(i))); //move front shoulder
+    move_motor(rfs, (h_rfs + rom_limb) - (0.5 * dynamic_movement_legs(i)));
 
-  //   move_motor(rhs, (h_rhs - rom_limb) + (0.5 * dynamic_movement_legs(i))); //move back shoulder         
-  //   move_motor(lhs, (h_lhs - rom_limb) + (0.5 * dynamic_movement_legs(i)));
+    move_motor(rhs, (h_rhs - rom_limb) + (0.5 * dynamic_movement_legs(i))); //move back shoulder         
+    move_motor(lhs, (h_lhs - rom_limb) + (0.5 * dynamic_movement_legs(i)));
      
-  //   if (dynamic_wrist_angle == 1)
-  //   {
-  //   move_motor(lfa, h_lfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));  //rotate wrists 
-  //   move_motor(rfa, h_rfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));
-  //   move_motor(lha, h_lha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
-  //   move_motor(rha, h_rha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
-  //   } 
-  //   delay(speed_val);
-  // } 
+    if (dynamic_wrist_angle == 1)
+    {
+    move_motor(lfa, h_lfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));  //rotate wrists 
+    move_motor(rfa, h_rfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));
+    move_motor(lha, h_lha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
+    move_motor(rha, h_rha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
+    } 
+    delay(speed_val);
+  } 
 
 
-  //   for (int i = 0; i <= resolution_dynamic_functions; i++)
-  //   {
-  //   move_motor(lhf, (h_lhf + rom_feet) - dynamic_movement_feet(i)); //drop feet 
-  //   move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
-  //   delay(speed_val_foot); 
-  //   }
-
+    for (int i = 0; i <= resolution_dynamic_functions; i++)
+    {
+    move_motor(lhf, (h_lhf + rom_feet) - dynamic_movement_feet(i)); //drop feet 
+    move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
+    delay(speed_val_foot); 
+    }
     // Serial.println("Done with final half step"); 
+  }
+
   delay(500); 
   Serial.println("All Steps done"); 
   step_val = 0; 
   gait = 0; //resets gait variable 
   interrupt = false; 
+  interrupt_mid_stride = false; 
   home_pos();
   delay(2000); 
   home_pos(); 

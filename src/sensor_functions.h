@@ -38,20 +38,20 @@ int get_dist(){
   int mean_dist; 
 
   measured_dist = vl53.distance();
-  Serial.println(measured_dist); 
+  // Serial.println(measured_dist); 
 
   if (measured_dist <= 230 && measured_dist > 0)
   {
     interrupt = true; 
-    Serial.println(measured_dist); 
-    Serial.println("End of track reached!"); 
+    // Serial.println(measured_dist); 
+    // Serial.println("End of track reached!"); 
   }
 
   if (measured_dist == -1) //input max reading of sensor here/fall value 
   {
     interrupt = true; 
-    Serial.println(measured_dist); 
-    Serial.println("Distance sensor read max!"); 
+    // Serial.println(measured_dist); 
+    // Serial.println("Distance sensor read max!"); 
     measured_dist = 9999; 
     return measured_dist;
   }
