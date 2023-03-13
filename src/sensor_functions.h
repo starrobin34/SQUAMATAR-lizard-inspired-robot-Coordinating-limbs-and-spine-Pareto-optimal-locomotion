@@ -23,6 +23,7 @@ float extMeterReading_mA = 1000;
 float y_ang_offset = 0.0, z_ang_offset = 0.0, x_acc_offset = 0.0, y_acc_offset = 0.0, z_acc_offset = 0.0;  
 
 int step_val = 0; 
+bool interrupt = false; 
 
 int get_dist(); 
 float get_current(); 
@@ -37,19 +38,22 @@ int get_dist(){
   int mean_dist; 
 
   measured_dist = vl53.distance();
+  Serial.println(measured_dist); 
 
-  if (measured_dist <= 100)
+  if (measured_dist <= 230 && measured_dist > 0)
   {
-    step_val = 200; 
+    interrupt = true; 
     Serial.println(measured_dist); 
     Serial.println("End of track reached!"); 
   }
 
-  if (measured_dist == -1) //input max reading of sensor here 
+  if (measured_dist == -1) //input max reading of sensor here/fall value 
   {
-    step_val = 200; 
+    interrupt = true; 
     Serial.println(measured_dist); 
     Serial.println("Distance sensor read max!"); 
+    measured_dist = 9999; 
+    return measured_dist;
   }
 
   for (size_t i = 0; i < sample_size; i++)
@@ -57,12 +61,7 @@ int get_dist(){
     sum += vl53.distance();
     delay(1); 
   }
-
   mean_dist = sum / sample_size; 
-
-    // Serial.print("Dist. Sensor read: "); 
-    // Serial.println(mean_dist); 
-  
   return mean_dist;
 }
 

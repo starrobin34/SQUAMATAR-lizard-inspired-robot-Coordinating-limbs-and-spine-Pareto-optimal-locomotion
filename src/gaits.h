@@ -76,23 +76,23 @@ float leg_length = 105, spine_length = 315, spine_middle = 181, should_offset = 
 float spine_front = (spine_length - spine_middle) / 2;  
 
 //Variables for Data Collection 
-float elapsed_time[11] =  {0}; //time of step in s 
+float elapsed_time[11] =  {0.0}; //time of step in s 
 int stride[11] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}; 
 int distance[11] = {0}; //sum covered distance in mm 
 //accelerometer/gyro 
-float mean_acc_xaxis[11] =  {0};
-float mean_acc_yaxis[11] = {0};
-float mean_acc_zaxis[11] = {0};
-float angle_yaxis[11] = {0}; //acc at end of stride ---> for calculation of angle 
-float angle_zaxis[11] = {0}; //acc at end of stride ---> for calculation of angle 
-float xaxis_during_stride [10] = {0}; 
-float yaxis_during_stride [10] = {0};
-float zaxis_during_stride [10] = {0};
+float mean_acc_xaxis[11] =  {0.0};
+float mean_acc_yaxis[11] = {0.0};
+float mean_acc_zaxis[11] = {0.0};
+float angle_yaxis[11] = {0.0}; //acc at end of stride ---> for calculation of angle 
+float angle_zaxis[11] = {0.0}; //acc at end of stride ---> for calculation of angle 
+float xaxis_during_stride [10] = {0.0}; 
+float yaxis_during_stride [10] = {0.0};
+float zaxis_during_stride [10] = {0.0};
 float xaxis_sum, yaxis_sum, zaxis_sum;
 //current measurements
-float mean_current[11] = {0}; //average current consumption per stride in A
-float max_current [11] = {0};//displays maximal current spike in a stride in A 
-float current_during_stride [10] = {0}; //stores current values of a stride, size displays number of measurements per stride
+float mean_current[11] = {0.0}; //average current consumption per stride in A
+float max_current [11] = {0.0};//displays maximal current spike in a stride in A 
+float current_during_stride [10] = {0.0}; //stores current values of a stride, size displays number of measurements per stride
 float curr_sum;
 int curr_index = 0; 
 //Servo Success in % e.g. did Servo reach the desired position 
@@ -146,7 +146,7 @@ static int hh_rfa = 143; //Front Right Wrist Angle
 int h_rfa = hh_rfa; 
 static int hh_lha = 131; //Hind left Wrist Angle
 int h_lha = hh_lha; 
-static int hh_rha = 141; //Hind Rigth Wrist Angle
+static int hh_rha = 148; //Hind Rigth Wrist Angle
 int h_rha = hh_rha; 
 
 void move_motor(int motor_num, int angle){
@@ -185,7 +185,28 @@ void move_motor(int motor_num, int angle){
 }
 
 void gait1(){ //gait for regular forward movement 
-
+    //reset all arrays 
+  delay(500);
+  for (size_t i = 0; i <= 10; i++)
+  {
+    elapsed_time[i] = 0.0; 
+    distance[i] = 0; 
+    mean_acc_xaxis[i] = 0.0; 
+    mean_acc_yaxis[i] = 0.0; 
+    mean_acc_zaxis[i] = 0.0; 
+    angle_yaxis[i] = 0.0; 
+    angle_zaxis[i] = 0.0;
+    mean_current[i] = 0.0; 
+    max_current[i] = 0.0; 
+    //succ
+  }
+  for (size_t i = 0; i <= 9; i++)
+  {
+    xaxis_during_stride[i] = 0.0; 
+    yaxis_during_stride[i] = 0.0; 
+    zaxis_during_stride[i] = 0.0; 
+    current_during_stride[i] = 0.0; 
+  }
   //calibration vals for accelerometer angle calc 
   y_ang_offset = get_accel(4);
   z_ang_offset = get_accel(5);
@@ -196,7 +217,6 @@ void gait1(){ //gait for regular forward movement
   // Serial.println(z_ang_offset);
 
   // intial  (half) right step starting from home position 
-    
   for (int i = 0; i < resolution_dynamic_functions; i++)
   {
     move_motor(lff, h_lff + dynamic_movement_feet(i)); //lift two across feet
@@ -249,7 +269,7 @@ void gait1(){ //gait for regular forward movement
   double psi_max = psi_delta - delta; 
   psi_max = psi_max *(180 / PI); 
 
-  for (step_val ; step_val <= (number_of_steps - 1); step_val++) //
+  for (step_val; step_val <= (number_of_steps - 1); step_val++) //
   {
     //left step 1-11 -------------------------------------------------------------------- LEFT
 
@@ -289,7 +309,7 @@ void gait1(){ //gait for regular forward movement
         curr_index ++; 
         // Serial.println(current_during_stride[curr_index]);
 
-        //gyro PROBLEM: SLOW !!!!!!!!!
+        //gyro 
         xaxis_during_stride[curr_index] = get_accel(1); 
         yaxis_during_stride[curr_index] = get_accel(2); 
         zaxis_during_stride[curr_index] = get_accel(3); 
@@ -302,8 +322,16 @@ void gait1(){ //gait for regular forward movement
     move_motor(lhf, (h_lhf + rom_feet) - dynamic_movement_feet(i)); //drop feet 
     move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
     delay(speed_val_foot); 
-
     }
+
+    get_dist(); //to detect if end of track/fall mid stride 
+    if (interrupt == true)
+    {
+      Serial.println("Gait interrupted mid stride"); 
+      step_val = 200; 
+      break;
+    }
+    
     // Serial.println("Done with left step"); 
 
     //Success (currently only measured for the left step and not for the feet (not enough pins)) 
@@ -336,8 +364,6 @@ void gait1(){ //gait for regular forward movement
     //right step 1-11 --------------------------------------------------------------------- RIGHT
 
     // Serial.println("Starting with right step");
-
-
     for (int i = 0; i < resolution_dynamic_functions; i++) 
     { 
 
@@ -377,7 +403,6 @@ void gait1(){ //gait for regular forward movement
         yaxis_during_stride[curr_index] = get_accel(2); 
         zaxis_during_stride[curr_index] = get_accel(3); 
       }
-
       delay(speed_val);
     }
 
@@ -395,20 +420,6 @@ void gait1(){ //gait for regular forward movement
     //------------------------------------------------------------------
 
     elapsed_time[step_val] = (millis()/1000) - start_time; 
-    //Calculate actual distance covered 
-    int raw_dist; 
-    if (step_val == 0)
-    {
-      raw_dist =  get_dist(); 
-      distance[step_val] = first_dist - raw_dist; 
-    }
-
-    if (step_val > 0)
-    { 
-      int temp_dist = get_dist(); 
-      distance[step_val] =  raw_dist - temp_dist; 
-      raw_dist = temp_dist; 
-    }
 
     // //find max and calc mean current 
     max_current[step_val] = current_during_stride[0];  
@@ -449,60 +460,93 @@ void gait1(){ //gait for regular forward movement
     //calc pitch, roll 
     angle_yaxis[step_val] = get_accel(4); 
     angle_zaxis[step_val] = get_accel(5); 
+    
     // Serial.println(angle_yaxis[step_val]); 
     // Serial.println(angle_zaxis[step_val]); 
   // server.handleClient(); //needed if live table used ?!
+
+     //Calculate actual distance covered 
+    int raw_dist; 
+    int temp_dist; 
+
+    if (step_val == 0) {
+      raw_dist = get_dist(); 
+      if (interrupt == true)
+      {
+        distance[step_val] = first_dist - raw_dist; 
+        step_val = 200; 
+        break; 
+      }
+      else {
+        distance[step_val] = first_dist - raw_dist;  
+      }
+    }
+
+    if (step_val > 0 && step_val < 199)
+    { 
+      temp_dist = get_dist();
+      if (interrupt == true) 
+      {
+        distance[step_val] =  raw_dist - temp_dist;
+        step_val = 200; 
+        break; 
+      }
+      else {
+        distance[step_val] =  raw_dist - temp_dist; 
+        raw_dist = temp_dist; 
+      }
+    }   
   }
 
-  // final (half) leftstep to get into home position
-  // Serial.println("Starting with final half left step"); 
+  // // final (half) leftstep to get into home position
+  // // Serial.println("Starting with final half left step"); 
     
-  for (int i = 0; i <= resolution_dynamic_functions; i++)
-  {
-  move_motor(lhf, h_lhf + dynamic_movement_feet(i)); //lift two across feet
-  move_motor(rff, h_rff - dynamic_movement_feet(i));
-  delay(speed_val_foot); 
+  // for (int i = 0; i <= resolution_dynamic_functions; i++)
+  // {
+  // move_motor(lhf, h_lhf + dynamic_movement_feet(i)); //lift two across feet
+  // move_motor(rff, h_rff - dynamic_movement_feet(i));
+  // delay(speed_val_foot); 
 
-  }
+  // }
     
-  for (int i = 0 ; i <= resolution_dynamic_functions; i++) 
-  {
-    move_motor(f_s, (h_fs + rom_spine) - (0.5 * dynamic_movement_spine(i))); //bend body via spine
-    move_motor(h_s, (h_hs - rom_spine) + (0.5 * dynamic_movement_spine(i)));
+  // for (int i = 0 ; i <= resolution_dynamic_functions; i++) 
+  // {
+  //   move_motor(f_s, (h_fs + rom_spine) - (0.5 * dynamic_movement_spine(i))); //bend body via spine
+  //   move_motor(h_s, (h_hs - rom_spine) + (0.5 * dynamic_movement_spine(i)));
   
-    move_motor(lfs, (h_lfs + rom_limb) - (0.5 * dynamic_movement_legs(i))); //move front shoulder
-    move_motor(rfs, (h_rfs + rom_limb) - (0.5 * dynamic_movement_legs(i)));
+  //   move_motor(lfs, (h_lfs + rom_limb) - (0.5 * dynamic_movement_legs(i))); //move front shoulder
+  //   move_motor(rfs, (h_rfs + rom_limb) - (0.5 * dynamic_movement_legs(i)));
 
-    move_motor(rhs, (h_rhs - rom_limb) + (0.5 * dynamic_movement_legs(i))); //move back shoulder         
-    move_motor(lhs, (h_lhs - rom_limb) + (0.5 * dynamic_movement_legs(i)));
+  //   move_motor(rhs, (h_rhs - rom_limb) + (0.5 * dynamic_movement_legs(i))); //move back shoulder         
+  //   move_motor(lhs, (h_lhs - rom_limb) + (0.5 * dynamic_movement_legs(i)));
      
-    if (dynamic_wrist_angle == 1)
-    {
-    move_motor(lfa, h_lfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));  //rotate wrists 
-    move_motor(rfa, h_rfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));
-    move_motor(lha, h_lha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
-    move_motor(rha, h_rha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
-    }
-     
-     
-    delay(speed_val);
-
-  } 
+  //   if (dynamic_wrist_angle == 1)
+  //   {
+  //   move_motor(lfa, h_lfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));  //rotate wrists 
+  //   move_motor(rfa, h_rfa + (rom_spine - 0.5 * dynamic_movement_legs(i)) + (rom_limb - 0.5 * dynamic_movement_spine(i)));
+  //   move_motor(lha, h_lha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
+  //   move_motor(rha, h_rha + (-rom_spine + 0.5 * dynamic_movement_legs(i)) + (-rom_limb + 0.5 * dynamic_movement_spine(i)));
+  //   } 
+  //   delay(speed_val);
+  // } 
 
 
-    for (int i = 0; i <= resolution_dynamic_functions; i++)
-    {
-    move_motor(lhf, (h_lhf + rom_feet) - dynamic_movement_feet(i)); //drop feet 
-    move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
-    delay(speed_val_foot); 
-    }
+  //   for (int i = 0; i <= resolution_dynamic_functions; i++)
+  //   {
+  //   move_motor(lhf, (h_lhf + rom_feet) - dynamic_movement_feet(i)); //drop feet 
+  //   move_motor(rff, (h_rff - rom_feet) + dynamic_movement_feet(i));
+  //   delay(speed_val_foot); 
+  //   }
 
     // Serial.println("Done with final half step"); 
-    Serial.println("All Steps done"); 
-
+  delay(500); 
+  Serial.println("All Steps done"); 
   step_val = 0; 
-  gait = 0; //resets gait variable  
-
+  gait = 0; //resets gait variable 
+  interrupt = false; 
+  home_pos();
+  delay(2000); 
+  home_pos(); 
 }
 
 void home_pos(){

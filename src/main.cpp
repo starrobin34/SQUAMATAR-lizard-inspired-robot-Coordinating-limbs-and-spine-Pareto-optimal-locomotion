@@ -57,7 +57,7 @@ void setup() {
     while (1)       delay(10);
   }
 
-  vl53.setTimingBudget(140); // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms!
+  vl53.setTimingBudget(100); // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms!
   vl53.VL53L1X_SetDistanceMode(2); //2 = long, 1=short
 
   //Gyro 
