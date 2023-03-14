@@ -222,7 +222,7 @@ void download_data(){
   //data collection
   txt += "Stride";
   txt += ", ";
-  txt += "Distance_per_step_mm";
+  txt += "Distance_per_stride_mm";
   txt += ", ";
   txt += "Time_in_s";
   txt += ", ";

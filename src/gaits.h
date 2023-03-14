@@ -55,7 +55,7 @@ int rom_limb = 10; //range of motion of legs
 int rom_feet = 75; //range of motion of feet 
 int dynamic = 1; //defines which dynamic to use (1 = sigmoid, 2 = sinusoid) 
 int gait = 0;  // defines which gait to use (0, no gait, 1 = regular gait, 2 turn gait (NOT YET IMPLEMENTED)) 
-int speed_val = 15; //(500 Standard) Speed of leg and spine (changes the delay between each increment in microseconds)
+int speed_val = 15; //(15 Standard) Speed of leg and spine (changes the delay between each increment in microseconds)
 int speed_val_foot = 15; // defines the speed for lifting the feet (changes the delay between each increment in microseconds)
 int number_of_steps = 11; //number of full steps to be taken 
 int foot_center= 0; //defines the offset of the angle of the feet to the vertical to the ground axis 
@@ -67,7 +67,7 @@ int dynamic_wrist_angle = 1; //defines if dynamically counteracting Wrist angle 
 
 //Input Variables for motion (not adjustable in web interface) 
 int resolution_dynamic_functions = 50; //increments for the dynamic functions 
-static int rom_wrist_angle = rom_spine + rom_limb; 
+int rom_wrist_angle = rom_spine + rom_limb; 
 
 //information variables  
 int climb_incline = 90; 
@@ -150,41 +150,6 @@ static int hh_lha = 131; //Hind left Wrist Angle
 int h_lha = hh_lha; 
 static int hh_rha = 148; //Hind Rigth Wrist Angle
 int h_rha = hh_rha; 
-
-void move_motor(int motor_num, int angle){
-    
-  int pulsewidth; 
-
-  if (4 <= motor_num && 7 >= motor_num) 
-  {
-    pulsewidth = map(angle, 30, 150, datan_servo_min, datan_servo_max); 
-    pwm.setPWM(motor_num, 0, pulsewidth); 
-    // Serial.print("Servo Num Datan: "); 
-    // Serial.println(motor_num);
-    // Serial.print("Angle: ");   
-    // Serial.println(angle); 
-  }
-
-  //Wrist
-  else if (8 <= motor_num && 11 >= motor_num){
-    pulsewidth = map(angle, 0, 270, dms_servo_min, dms_servo_max); 
-    pwm.setPWM(motor_num, 0, pulsewidth); 
-    // Serial.print("Servo Num DMS: "); 
-    // Serial.println(motor_num);
-    // Serial.print("Angle: ");   
-    // Serial.println(angle); 
-
-  }
-    //Spine Shoulder 
-    else {
-    pulsewidth = map(angle, 30, 150, dss_servo_min, dss_servo_max); 
-    pwm.setPWM(motor_num, 0, pulsewidth); 
-    // Serial.print("Servo Num DSS: "); 
-    // Serial.println(motor_num);
-    // Serial.print("Angle: ");   
-    // Serial.println(angle); 
-    }
-}
 
 void gait1(){ //gait for regular forward movement 
     //reset all arrays 
@@ -306,8 +271,8 @@ void gait1(){ //gait for regular forward movement
 
       if (i % 10 == 0) //get current/accel each 10th increment 
       {
+        curr_index = i / 10; 
         current_during_stride[curr_index] = get_current(); //index 0-4
-        curr_index ++; 
         // Serial.println(current_during_stride[curr_index]);
 
         //gyro 
@@ -397,9 +362,9 @@ void gait1(){ //gait for regular forward movement
 
       if (i % 10 == 0) //get current/accel each 10th increment 
       {
+        curr_index = 4 + (i / 10); 
         current_during_stride[curr_index] = get_current(); //index 5 - 9
-        curr_index ++; 
-        
+        //gyro 
         xaxis_during_stride[curr_index] = get_accel(1); 
         yaxis_during_stride[curr_index] = get_accel(2); 
         zaxis_during_stride[curr_index] = get_accel(3); 
@@ -420,7 +385,7 @@ void gait1(){ //gait for regular forward movement
     //read Sensors/get data
     //------------------------------------------------------------------
 
-    elapsed_time[step_val] = (millis()/1000) - start_time; 
+    elapsed_time[step_val] = (millis()/1000.0) - start_time; 
 
     // //find max and calc mean current 
     max_current[step_val] = current_during_stride[0];  
@@ -447,9 +412,9 @@ void gait1(){ //gait for regular forward movement
     xaxis_sum = 0.0, yaxis_sum = 0.0, zaxis_sum = 0.0;  
     for (size_t i = 0; i < (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0])); i++)
     {
-      xaxis_sum += xaxis_during_stride[i] - x_acc_offset; 
-      yaxis_sum += yaxis_during_stride[i] - y_acc_offset; 
-      zaxis_sum += zaxis_during_stride[i] - z_acc_offset; 
+      xaxis_sum += (xaxis_during_stride[i] - x_acc_offset); 
+      yaxis_sum += (yaxis_during_stride[i] - y_acc_offset); 
+      zaxis_sum += (zaxis_during_stride[i] - z_acc_offset); 
     }
     mean_acc_xaxis[step_val] = xaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0])); 
     mean_acc_yaxis[step_val] = yaxis_sum / (sizeof(xaxis_during_stride) / sizeof(xaxis_during_stride[0]));
@@ -499,7 +464,7 @@ void gait1(){ //gait for regular forward movement
     }   
   }
 
-  Serial.println(interrupt_mid_stride); 
+  // Serial.println(interrupt_mid_stride); 
 
   if (interrupt_mid_stride == true)
   {
@@ -596,6 +561,41 @@ void gait1(){ //gait for regular forward movement
   home_pos();
   delay(2000); 
   home_pos(); 
+}
+
+void move_motor(int motor_num, int angle){
+    
+  int pulsewidth; 
+
+  if (4 <= motor_num && 7 >= motor_num) 
+  {
+    pulsewidth = map(angle, 30, 150, datan_servo_min, datan_servo_max); 
+    pwm.setPWM(motor_num, 0, pulsewidth); 
+    // Serial.print("Servo Num Datan: "); 
+    // Serial.println(motor_num);
+    // Serial.print("Angle: ");   
+    // Serial.println(angle); 
+  }
+
+  //Wrist
+  else if (8 <= motor_num && 11 >= motor_num){
+    pulsewidth = map(angle, 0, 270, dms_servo_min, dms_servo_max); 
+    pwm.setPWM(motor_num, 0, pulsewidth); 
+    // Serial.print("Servo Num DMS: "); 
+    // Serial.println(motor_num);
+    // Serial.print("Angle: ");   
+    // Serial.println(angle); 
+
+  }
+    //Spine Shoulder 
+    else {
+    pulsewidth = map(angle, 30, 150, dss_servo_min, dss_servo_max); 
+    pwm.setPWM(motor_num, 0, pulsewidth); 
+    // Serial.print("Servo Num DSS: "); 
+    // Serial.println(motor_num);
+    // Serial.print("Angle: ");   
+    // Serial.println(angle); 
+    }
 }
 
 void home_pos(){
