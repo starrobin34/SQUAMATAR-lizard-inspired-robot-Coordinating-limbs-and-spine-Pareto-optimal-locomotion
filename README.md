@@ -1,8 +1,6 @@
 # X5 Robot Generation 
 
-X5 version of lizard climbing robot.
 
-Branch "x5-mini-code" --> ESP32 Update for x4 version 
 
 # Platformio Setup for ESP32
 
