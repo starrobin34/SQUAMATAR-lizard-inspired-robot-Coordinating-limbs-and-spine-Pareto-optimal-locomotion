@@ -3,7 +3,7 @@
 We establish a lizard inspired quadrupedal robot which is able to walk on flat surfaces and climb on inclined or horizontal textured walls. 
 
 #Introduction Video
-https://github.com/starrobin34/SQUAMATAR-lizard-inspired-robot-Coordinating-limbs-and-spine-Pareto-optimal-locomotion/assets/82499284/982259e1-00c4-464d-aa55-644c412c6fdf
+
 
 https://www.youtube.com/watch?v=ass1qw14DFM
 
@@ -21,6 +21,10 @@ Key features
 # Overstepping 
 Lizards were able to outperform the model predictions and the performance of the robot. We suggest this is due to the lizards overstepping their hindlimbs e.g. placing them at the same spot or in front of their fore limbs. 
 This is physically not possible for the robot and a geometric limitation of the model. 
+
+
+https://github.com/starrobin34/SQUAMATAR-lizard-inspired-robot-Coordinating-limbs-and-spine-Pareto-optimal-locomotion/assets/82499284/ca8f6793-2c17-4a9e-8aff-b4e42e71c2db
+
 
 # Citation
 
