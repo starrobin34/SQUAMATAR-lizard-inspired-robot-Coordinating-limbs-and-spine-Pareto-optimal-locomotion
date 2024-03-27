@@ -1,6 +1,6 @@
 # Introduction
-
-We establish a lizard inspired quadrupedal robot which is able to walk on flat surfaces and climb on inclined or horizontal textured walls. 
+We establish a lizard inspired quadrupedal robot which is able to walk on flat surfaces and climb on inclined or horizontal textured walls using claws. 
+This repository contains supplementary videos for the publication Rockenfeller et al., 2024 titled "Coordinating limbs and spine: (Pareto-)optimal locomotion in theory, in vivo, and in robots" published in .... 
 
 https://github.com/starrobin34/SQUAMATAR-lizard-inspired-robot-Coordinating-limbs-and-spine-Pareto-optimal-locomotion/assets/82499284/5d567510-2994-403e-8367-0f4579bea776
 
@@ -14,7 +14,11 @@ Key features
 
 # Comparison lizards, model and robot configurations  
 
-https://github.com/starrobin34/SQUAMATAR-lizard-inspired-robot-Coordinating-limbs-and-spine-Pareto-optimal-locomotion/assets/82499284/721054e1-d76e-4948-b58f-028a76c9a4d0
+
+
+https://github.com/starrobin34/SQUAMATAR-lizard-inspired-robot-Coordinating-limbs-and-spine-Pareto-optimal-locomotion/assets/82499284/8a1a541c-8dde-45e4-b975-650c562a7367
+
+
 
 
 # Overstepping 
