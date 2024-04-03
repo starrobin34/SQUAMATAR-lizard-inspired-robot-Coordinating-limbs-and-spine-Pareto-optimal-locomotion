@@ -14,12 +14,7 @@ Key features
 
 # Comparison lizards, model and robot configurations  
 
-
-
-https://github.com/starrobin34/SQUAMATAR-lizard-inspired-robot-Coordinating-limbs-and-spine-Pareto-optimal-locomotion/assets/82499284/8a1a541c-8dde-45e4-b975-650c562a7367
-
-
-
+https://github.com/starrobin34/SQUAMATAR-lizard-inspired-robot-Coordinating-limbs-and-spine-Pareto-optimal-locomotion/assets/82499284/a11de8b8-b702-45a9-a864-d049114126cf
 
 # Overstepping 
 Lizards were able to outperform the model predictions and the performance of the robot. We suggest this is due to the lizards overstepping their hindlimbs e.g. placing them at the same spot or in front of their fore limbs. 
